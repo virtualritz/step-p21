@@ -9,7 +9,7 @@ members = [
 
 # Shared metadata, so the four crates cannot drift apart.
 [workspace.package]
-version = "0.5.0"
+version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
 license = "Apache-2.0"
@@ -63,5 +63,5 @@ trybuild = "1"
 # make `step-p21` unpublishable. Cargo strips path-only dev-dependencies instead.
 step-p11 = { path = "crates/step-p11" }
 step-p11-derive = { path = "crates/step-p11-derive" }
-step-p21 = { version = "0.5.0", path = "crates/step-p21" }
-step-p21-derive = { version = "0.5.0", path = "crates/step-p21-derive" }
+step-p21 = { version = "0.1.0", path = "crates/step-p21" }
+step-p21-derive = { version = "0.1.0", path = "crates/step-p21-derive" }

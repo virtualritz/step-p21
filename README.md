@@ -1,7 +1,4 @@
-**Experimental: the API will change. Not recommended for production use yet.**
-
-step-p21
-=========
+# `step-p21`
 
 ## Overview
 
@@ -56,28 +53,23 @@ See [`CHANGELOG.md`](CHANGELOG.md); Apache-2.0 requires stating modifications, s
 divergence is recorded there rather than summarised loosely.
 
 
-| name | crates.io | docs.rs | master | description |
-|:-----|:----------|:--------|:-------|-------------|
-| step-p11 |[![Crate](https://img.shields.io/crates/v/step-p11.svg)](https://crates.io/crates/step-p11) |[![docs.rs](https://docs.rs/step-p11/badge.svg)](https://docs.rs/step-p11) |[![cargo-doc](https://img.shields.io/badge/master-step-p11-blue)][step-p11-doc] |[EXPRESS Language (ISO 10303-11)][EXPRESS] Compiler|
-| step-p11-derive |[![Crate](https://img.shields.io/crates/v/step-p11-derive.svg)](https://crates.io/crates/step-p11-derive) |[![docs.rs](https://docs.rs/step-p11-derive/badge.svg)](https://docs.rs/step-p11-derive) |[![cargo-doc](https://img.shields.io/badge/master-step_p11_derive-blue)][step-p11-derive-doc] |proc-macro for running step-p11 compiler|
-| step-p21 | [![Crate](https://img.shields.io/crates/v/step-p21.svg)](https://crates.io/crates/step-p21) | [![docs.rs](https://docs.rs/step-p21/badge.svg)](https://docs.rs/step-p21) |[![cargo-doc](https://img.shields.io/badge/master-step-p21-blue)][step-p21-doc]|Serialize/Deserialize STEP files|
-| step-p21-derive | [![Crate](https://img.shields.io/crates/v/step-p21-derive.svg)](https://crates.io/crates/step-p21-derive) | [![docs.rs](https://docs.rs/step-p21-derive/badge.svg)](https://docs.rs/step-p21-derive) |[![cargo-doc](https://img.shields.io/badge/master-step-p21--derive-blue)][step-p21-derive-doc]|proc-macro helper crate|
+| name | crates.io | docs.rs | description |
+|:-----|:----------|:--------|-------------|
+| `step-p11` | _not published_ | | | [EXPRESS Language (ISO 10303-11)][EXPRESS] compiler, used only by this workspace's tests and the `expressc` binary |
+| `step-p11-derive` | _not published_ | | | proc-macro that runs the `step-p11` compiler |
+| step-p21 | [![Crate](https://img.shields.io/crates/v/step-p21.svg)](https://crates.io/crates/step-p21) | [![docs.rs](https://docs.rs/step-p21/badge.svg)](https://docs.rs/step-p21)|Serialize/Deserialize STEP files|
+| step-p21-derive | [![Crate](https://img.shields.io/crates/v/step-p21-derive.svg)](https://crates.io/crates/step-p21-derive) | [![docs.rs](https://docs.rs/step-p21-derive/badge.svg)](https://docs.rs/step-p21-derive)|proc-macro helper crate|
 
-[step-p11-doc]: https://virtualritz.github.io/step-p21/step-p11/index.html
-[step-p11-derive-doc]: https://virtualritz.github.io/step-p21/step_p11_derive/index.html
-[step-p21-doc]: https://virtualritz.github.io/step-p21/step-p21/index.html
-[step-p21-derive-doc]: https://virtualritz.github.io/step-p21/step_p21_derive/index.html
 [EXPRESS]: https://www.iso.org/standard/38047.html
 
-What is STEP?
---------------
+## What is STEP?
 
 - STEP is a set of data serialize formats, schema language, and common schemas.
 - Data serialize format is called **exchange structure** in ISO document, but usually called **STEP file**,
   They are serialized as ASCII text (ISO-10303-21, usually with extension `*.step`, `*.stp` or `*.p21`) or XML (ISO-10303-28).
 - Schema language is called **EXPRESS**. EXPRESS file is usually named with extension `*.exp`.
 - Many common schemas are defined in ISO-10303 by EXPRESS language.
-  - [schemas](./schemas) contains copies
+  - [`schemas`](https://github.com/virtualritz/step-p21/tree/master/schemas) contains copies
   - Application Protocol (AP) is a class of defined schemas, and the main target of this project.
   - AP203 is most famous one in CAD (computer-aided design) applications.
 
@@ -93,8 +85,7 @@ What is STEP?
 [pbspec]: https://developers.google.com/protocol-buffers/docs/reference/proto3-spec
 [pbencoding]: https://developers.google.com/protocol-buffers/docs/encoding
 
-Why step-p21?
---------------
+## Why `step-p21`?
 
 - STEP is not only for CAD
   - EXPRESS is a general data schema like [Protocol Buffers][pbspec]
@@ -110,33 +101,14 @@ Why step-p21?
 - We have to generate many codes from EXPRESS schemas
   - Tables for SQL or NoSQL database, Object-Record Mapper (ORM)
   - on-wire, on-memory format
-    - ASCII / XML are inefficient than binary format e.g. protocol buffers
+    - ASCII and XML are less efficient than a binary format such as protocol buffers
 - Extensible EXPRESS compiler is required
   - Like as protoc generates gRPC binding using gRPC-plugin
 
-Roadmap
---------
+## License
 
-### Released features
-
-- 0.1.0
-  - Minimal EXPRESS Compiler to generate Rust struct definitions
-  - Deserialize STEP file (ASCII) to Rust struct
-
-### TODO until 1.0 release
-
-- Serialize Rust struct to STEP file (ASCII) https://github.com/ricosjp/step-p21/issues/13
-- Translate rules in EXPRESS schema into Rust code https://github.com/ricosjp/step-p21/issues/43
-- Stablize AST and IR representation of step-p11
-
-### Planned features
-
-- Binary format convertible into STEP ASCII and XML formats
-- RDB support, ORM generation
-
-License
---------
-Copyright 2021 RICOS Co. Ltd.
+Copyright 2021 RICOS Co. Ltd. (upstream `ruststep`)
+Copyright 2026 Moritz Moeller (this fork)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -155,15 +127,13 @@ limitations under the License.
 The following directories are included for development purpose.
 **They are not parts of this project**.
 
-- [schemas](./schemas)
-- [step-p21/tests/steps](./step-p21/tests/steps)
+- [`schemas`](https://github.com/virtualritz/step-p21/tree/master/schemas)
+- [`crates/step-p21/tests/steps`](https://github.com/virtualritz/step-p21/tree/master/crates/step-p21/tests/steps)
 
-Contributor License Agreement (CLA)
-----------------------------------
+## Contributing
 
-When you contribute (code, documentation, or anything else),
-you have to be aware that your contribution is covered by the same Apache 2.0 License that is applied to step-p21 itself.
-This applies to all contributors, including those contributing on behalf of a company.
-If you agree to its content, you simply have to click on the link posted by the [CLA assistant bot](https://github.com/CLAassistant) as a comment to the pull request.
-Click it to check the CLA, then accept it on the following screen if you agree to it.
-[CLA assistant](https://cla-assistant.io/) will save this decision for upcoming contributions and will notify you if there is any change to the CLA in the meantime.
+Contributions are accepted under the same Apache-2.0 licence as the rest of the
+crate; there is no separate contributor agreement and no CLA bot on this fork.
+
+Fixes that are not fork-specific are worth offering to
+[upstream](https://github.com/ricosjp/ruststep) as well.

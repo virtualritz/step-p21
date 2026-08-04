@@ -109,7 +109,7 @@
 //! STEP implementation using XML(eXtensible Markup Language) is defined in
 //! [ISO-10303-28](https://www.iso.org/standard/40646.html).
 //!
-//! Not supported yet. See [tracking issue](https://github.com/ricosjp/step_p21/issues/215).
+//! Not supported yet. See [tracking issue](https://github.com/ricosjp/ruststep/issues/215).
 
 #![deny(rustdoc::broken_intra_doc_links)]
 

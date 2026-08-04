@@ -40,7 +40,7 @@
 //! Introduction to STEP
 //! ---------------------
 //!
-//! As we describe in [README](https://github.com/ricosjp/step_p21#readme),
+//! As we describe in [README](https://github.com/ricosjp/ruststep#readme),
 //! STEP consists of three components:
 //!
 //! - Schema language called EXPRESS
