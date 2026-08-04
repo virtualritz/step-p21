@@ -46,7 +46,7 @@ proc-macro-error2 = "2"
 proc-macro2 = "1"
 quote = "1"
 serde = { version = "1", features = ["derive"] }
-syn = { version = "2", features = ["full", "extra-traits"] }
+syn = { version = "3", features = ["full", "extra-traits"] }
 thiserror = "2"
 trybuild = "1"
 
