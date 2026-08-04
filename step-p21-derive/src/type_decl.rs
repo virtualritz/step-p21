@@ -1,11 +1,14 @@
 use inflector::Inflector;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::{format_ident, quote};
-use std::convert::*;
 
 use super::*;
 
-pub fn derive_holder(ident: &syn::Ident, st: &syn::DataStruct, attr: &HolderAttr) -> TokenStream2 {
+pub fn derive_holder(
+    ident: &syn::Ident,
+    st: &syn::DataStruct,
+    attr: &HolderAttr,
+) -> TokenStream2 {
     let name = ident.to_string().to_screaming_snake_case();
     let holder_ident = as_holder_ident(ident);
     let def_holder_tt = def_holder(ident, st);
@@ -42,7 +45,11 @@ pub fn def_holder(ident: &syn::Ident, st: &syn::DataStruct) -> TokenStream2 {
     }
 }
 
-pub fn impl_holder(ident: &syn::Ident, table: &HolderAttr, st: &syn::DataStruct) -> TokenStream2 {
+pub fn impl_holder(
+    ident: &syn::Ident,
+    table: &HolderAttr,
+    st: &syn::DataStruct,
+) -> TokenStream2 {
     let name = ident.to_string().to_screaming_snake_case();
     let holder_ident = as_holder_ident(ident);
     let FieldEntries {
@@ -75,7 +82,10 @@ pub fn impl_holder(ident: &syn::Ident, table: &HolderAttr, st: &syn::DataStruct)
     } // quote!
 }
 
-pub fn impl_entity_table(ident: &syn::Ident, table: &HolderAttr) -> TokenStream2 {
+pub fn impl_entity_table(
+    ident: &syn::Ident,
+    table: &HolderAttr,
+) -> TokenStream2 {
     let HolderAttr { table, field, .. } = table;
     let holder_ident = as_holder_ident(ident);
     let step_p21 = step_p21_crate();
@@ -95,7 +105,11 @@ pub fn impl_entity_table(ident: &syn::Ident, table: &HolderAttr) -> TokenStream2
 
 // `name` may be different from `ident`
 // because this will be used for both Entity struct and its `*Holder` struct.
-fn def_visitor(ident: &syn::Ident, name: &str, st: &syn::DataStruct) -> TokenStream2 {
+fn def_visitor(
+    ident: &syn::Ident,
+    name: &str,
+    st: &syn::DataStruct,
+) -> TokenStream2 {
     let visitor_ident = as_visitor_ident(ident);
     let FieldEntries { holder_types, .. } = FieldEntries::parse(st);
     let attr_len = holder_types.len();
@@ -149,7 +163,11 @@ fn def_visitor(ident: &syn::Ident, name: &str, st: &syn::DataStruct) -> TokenStr
 
 // `name` may be different from `ident`
 // because this will be used for both Entity struct and its `*Holder` struct.
-fn impl_deserialize(ident: &syn::Ident, name: &str, st: &syn::DataStruct) -> TokenStream2 {
+fn impl_deserialize(
+    ident: &syn::Ident,
+    name: &str,
+    st: &syn::DataStruct,
+) -> TokenStream2 {
     let visitor_ident = as_visitor_ident(ident);
     let FieldEntries { holder_types, .. } = FieldEntries::parse(st);
     let attr_len = holder_types.len();
@@ -200,11 +218,14 @@ impl FieldEntries {
             let ft: FieldType = field.ty.clone().try_into().unwrap();
             let index = syn::Index::from(i);
 
-            let HolderAttr { place_holder, .. } = HolderAttr::parse(&field.attrs);
+            let HolderAttr { place_holder, .. } =
+                HolderAttr::parse(&field.attrs);
             if place_holder {
                 match &ft {
                     FieldType::Path(_) => {
-                        into_owned.push(quote! { self.#index.into_owned(#table_arg)? });
+                        into_owned.push(
+                            quote! { self.#index.into_owned(#table_arg)? },
+                        );
                     }
                     FieldType::Optional(_) => {
                         into_owned.push(quote! { self.#index.map(|holder| holder.into_owned(#table_arg)).transpose()? },);
@@ -215,7 +236,9 @@ impl FieldEntries {
                             .map(|v| v.into_owned(#table_arg))
                             .collect::<::std::result::Result<Vec<_>, _>>()?
                     }),
-                    FieldType::Boxed(_) => abort_call_site!("Unexpected Box<T>"),
+                    FieldType::Boxed(_) => {
+                        abort_call_site!("Unexpected Box<T>")
+                    }
                 }
                 holder_types.push(ft.into_holder().into_place_holder().into());
             } else {

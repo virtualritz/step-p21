@@ -9,7 +9,8 @@ use nom::{
     character::complete::{char, satisfy},
 };
 
-/// latin_codepoint = [space] | [digit] | [lower] | [upper] | [special] | [reverse_solidus] | [apostrophe]
+/// latin_codepoint = [space] | [digit] | [lower] | [upper] | [special] |
+/// [reverse_solidus] | [apostrophe]
 pub fn latin_codepoint(input: &str) -> ParseResult<'_, char> {
     alt((
         space,
@@ -49,7 +50,9 @@ pub fn upper(input: &str) -> ParseResult<'_, char> {
     satisfy(|c| matches!(c, 'A'..='Z' | '_')).parse(input)
 }
 
-/// special  = `!` | `"` | `*` | `$` | `%` | `&` | `.` | `#` | `+` | `,`  | `-` | `(` | `)` | `?` | `/` | `:` | `;` | `<`  | `=` | `>` | `@` | `[` | `]` | `{` | `|` | `}`  | `^` | \` | `~` .
+/// special  = `!` | `"` | `*` | `$` | `%` | `&` | `.` | `#` | `+` | `,`  | `-`
+/// | `(` | `)` | `?` | `/` | `:` | `;` | `<`  | `=` | `>` | `@` | `[` | `]` |
+/// `{` | `|` | `}`  | `^` | \` | `~` .
 pub fn special(input: &str) -> ParseResult<'_, char> {
     satisfy(|c| {
         matches!(

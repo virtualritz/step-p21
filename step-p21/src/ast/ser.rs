@@ -21,16 +21,16 @@ struct RecordSerializer {
     stack: Vec<(String, Vec<Parameter>)>,
 }
 
-impl<'se> ser::Serializer for &'se mut RecordSerializer {
-    type Ok = ();
+impl ser::Serializer for &mut RecordSerializer {
     type Error = Error;
+    type Ok = ();
+    type SerializeMap = Self;
     type SerializeSeq = Self;
+    type SerializeStruct = Self;
+    type SerializeStructVariant = Self;
     type SerializeTuple = Self;
     type SerializeTupleStruct = Self;
     type SerializeTupleVariant = Self;
-    type SerializeMap = Self;
-    type SerializeStruct = Self;
-    type SerializeStructVariant = Self;
 
     fn serialize_bool(self, v: bool) -> Result<()> {
         if v {
@@ -46,12 +46,15 @@ impl<'se> ser::Serializer for &'se mut RecordSerializer {
     fn serialize_i8(self, v: i8) -> Result<()> {
         self.serialize_i64(i64::from(v))
     }
+
     fn serialize_i16(self, v: i16) -> Result<()> {
         self.serialize_i64(i64::from(v))
     }
+
     fn serialize_i32(self, v: i32) -> Result<()> {
         self.serialize_i64(i64::from(v))
     }
+
     fn serialize_i64(self, v: i64) -> Result<()> {
         self.parameters.push(Parameter::Integer(v));
         Ok(())
@@ -60,19 +63,26 @@ impl<'se> ser::Serializer for &'se mut RecordSerializer {
     fn serialize_u8(self, v: u8) -> Result<()> {
         self.serialize_i64(i64::from(v))
     }
+
     fn serialize_u16(self, v: u16) -> Result<()> {
         self.serialize_i64(i64::from(v))
     }
+
     fn serialize_u32(self, v: u32) -> Result<()> {
         self.serialize_i64(i64::from(v))
     }
+
     fn serialize_u64(self, v: u64) -> Result<()> {
-        self.serialize_i64(i64::try_from(v).expect("integer larger than i64::MAX is not supported"))
+        self.serialize_i64(
+            i64::try_from(v)
+                .expect("integer larger than i64::MAX is not supported"),
+        )
     }
 
     fn serialize_f32(self, v: f32) -> Result<()> {
         self.serialize_f64(f64::from(v))
     }
+
     fn serialize_f64(self, v: f64) -> Result<()> {
         self.parameters.push(Parameter::Real(v));
         Ok(())
@@ -81,10 +91,12 @@ impl<'se> ser::Serializer for &'se mut RecordSerializer {
     fn serialize_char(self, v: char) -> Result<()> {
         self.serialize_str(&v.to_string())
     }
+
     fn serialize_str(self, v: &str) -> Result<()> {
         self.parameters.push(Parameter::String(v.to_string()));
         Ok(())
     }
+
     fn serialize_bytes(self, _v: &[u8]) -> Result<()> {
         unimplemented!("Bytes is not supported yet")
     }
@@ -118,7 +130,11 @@ impl<'se> ser::Serializer for &'se mut RecordSerializer {
         self.serialize_str(variant)
     }
 
-    fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> Result<()>
+    fn serialize_newtype_struct<T>(
+        self,
+        _name: &'static str,
+        value: &T,
+    ) -> Result<()>
     where
         T: ?Sized + ser::Serialize,
     {
@@ -168,22 +184,26 @@ impl<'se> ser::Serializer for &'se mut RecordSerializer {
         Ok(self)
     }
 
-    fn serialize_struct(self, name: &'static str, _len: usize) -> Result<Self::SerializeStruct> {
+    fn serialize_struct(
+        self,
+        name: &'static str,
+        _len: usize,
+    ) -> Result<Self::SerializeStruct> {
         if self.name.is_empty() {
             self.name = name.to_string();
         } else {
             // Entering sub struct e.g.
             //
             // ```
-            // B(3.0, A((1.0, 2.0)))
-            //        ^ here
+            // B(3.0, A((1.0, 2.0))) ^ here
             // ```
             //
             // Put current parameters (`3.0` as above) onto the top of stack,
             // and start serializing `A((1.0, 2.0))`.
             // This stack will be popped in SerializeStruct::end()
             //
-            let current_name = std::mem::replace(&mut self.name, name.to_string());
+            let current_name =
+                std::mem::replace(&mut self.name, name.to_string());
             let current_params = std::mem::take(&mut self.parameters);
             self.stack.push((current_name, current_params));
         }
@@ -201,23 +221,10 @@ impl<'se> ser::Serializer for &'se mut RecordSerializer {
     }
 }
 
-impl<'se> ser::SerializeSeq for &'se mut RecordSerializer {
-    type Ok = ();
+impl ser::SerializeSeq for &mut RecordSerializer {
     type Error = Error;
-    fn serialize_element<T>(&mut self, value: &T) -> Result<()>
-    where
-        T: ?Sized + ser::Serialize,
-    {
-        value.serialize(&mut **self)
-    }
-    fn end(self) -> Result<()> {
-        Ok(())
-    }
-}
+    type Ok = ();
 
-impl<'se> ser::SerializeTuple for &'se mut RecordSerializer {
-    type Ok = ();
-    type Error = Error;
     fn serialize_element<T>(&mut self, value: &T) -> Result<()>
     where
         T: ?Sized + ser::Serialize,
@@ -230,9 +237,25 @@ impl<'se> ser::SerializeTuple for &'se mut RecordSerializer {
     }
 }
 
-impl<'se> ser::SerializeTupleStruct for &'se mut RecordSerializer {
-    type Ok = ();
+impl ser::SerializeTuple for &mut RecordSerializer {
     type Error = Error;
+    type Ok = ();
+
+    fn serialize_element<T>(&mut self, value: &T) -> Result<()>
+    where
+        T: ?Sized + ser::Serialize,
+    {
+        value.serialize(&mut **self)
+    }
+
+    fn end(self) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl ser::SerializeTupleStruct for &mut RecordSerializer {
+    type Error = Error;
+    type Ok = ();
 
     fn serialize_field<T>(&mut self, value: &T) -> Result<()>
     where
@@ -246,9 +269,9 @@ impl<'se> ser::SerializeTupleStruct for &'se mut RecordSerializer {
     }
 }
 
-impl<'se> ser::SerializeTupleVariant for &'se mut RecordSerializer {
-    type Ok = ();
+impl ser::SerializeTupleVariant for &mut RecordSerializer {
     type Error = Error;
+    type Ok = ();
 
     fn serialize_field<T>(&mut self, value: &T) -> Result<()>
     where
@@ -262,9 +285,9 @@ impl<'se> ser::SerializeTupleVariant for &'se mut RecordSerializer {
     }
 }
 
-impl<'se> ser::SerializeMap for &'se mut RecordSerializer {
-    type Ok = ();
+impl ser::SerializeMap for &mut RecordSerializer {
     type Error = Error;
+    type Ok = ();
 
     fn serialize_key<T>(&mut self, _key: &T) -> Result<()>
     where
@@ -285,11 +308,15 @@ impl<'se> ser::SerializeMap for &'se mut RecordSerializer {
     }
 }
 
-impl<'se> ser::SerializeStruct for &'se mut RecordSerializer {
-    type Ok = ();
+impl ser::SerializeStruct for &mut RecordSerializer {
     type Error = Error;
+    type Ok = ();
 
-    fn serialize_field<T>(&mut self, _key: &'static str, value: &T) -> Result<()>
+    fn serialize_field<T>(
+        &mut self,
+        _key: &'static str,
+        value: &T,
+    ) -> Result<()>
     where
         T: ?Sized + ser::Serialize,
     {
@@ -310,11 +337,15 @@ impl<'se> ser::SerializeStruct for &'se mut RecordSerializer {
     }
 }
 
-impl<'se> ser::SerializeStructVariant for &'se mut RecordSerializer {
-    type Ok = ();
+impl ser::SerializeStructVariant for &mut RecordSerializer {
     type Error = Error;
+    type Ok = ();
 
-    fn serialize_field<T>(&mut self, _key: &'static str, value: &T) -> Result<()>
+    fn serialize_field<T>(
+        &mut self,
+        _key: &'static str,
+        value: &T,
+    ) -> Result<()>
     where
         T: ?Sized + ser::Serialize,
     {

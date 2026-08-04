@@ -6,8 +6,14 @@ use serde::{
     forward_to_deserialize_any,
 };
 
-impl<'de, 'param> de::Deserializer<'de> for &'param Parameter {
+impl<'de> de::Deserializer<'de> for &Parameter {
     type Error = crate::error::Error;
+
+    forward_to_deserialize_any! {
+        i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bytes byte_buf unit unit_struct newtype_struct seq tuple
+        struct tuple_struct map enum identifier ignored_any
+    }
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
@@ -20,7 +26,9 @@ impl<'de, 'param> de::Deserializer<'de> for &'param Parameter {
             Parameter::Integer(val) => visitor.visit_i64(*val),
             Parameter::Real(val) => visitor.visit_f64(*val),
             Parameter::String(val) => visitor.visit_str(val),
-            Parameter::List(params) => visitor.visit_seq(SeqDeserializer::new(params)),
+            Parameter::List(params) => {
+                visitor.visit_seq(SeqDeserializer::new(params))
+            }
             Parameter::Ref(name) => visitor.visit_enum(name),
             Parameter::NotProvided | Parameter::Omitted => visitor.visit_none(),
             Parameter::Enumeration(variant) => {
@@ -39,7 +47,8 @@ impl<'de, 'param> de::Deserializer<'de> for &'param Parameter {
                 "TRUE" => visitor.visit_bool(true),
                 "F" => visitor.visit_bool(false),
                 "FALSE" => visitor.visit_bool(false),
-                _ => visitor.visit_enum(variant.to_pascal_case().into_deserializer()),
+                _ => visitor
+                    .visit_enum(variant.to_pascal_case().into_deserializer()),
             }
         } else {
             self.deserialize_any(visitor)
@@ -55,12 +64,6 @@ impl<'de, 'param> de::Deserializer<'de> for &'param Parameter {
         } else {
             visitor.visit_some(self)
         }
-    }
-
-    forward_to_deserialize_any! {
-        i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
-        bytes byte_buf unit unit_struct newtype_struct seq tuple
-        struct tuple_struct map enum identifier ignored_any
     }
 }
 
@@ -82,17 +85,17 @@ impl<'p> SeqDeserializer<'p> {
 impl<'de, 'p> de::Deserializer<'de> for SeqDeserializer<'p> {
     type Error = crate::error::Error;
 
+    forward_to_deserialize_any! {
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bytes byte_buf option unit unit_struct newtype_struct seq tuple
+        struct tuple_struct map enum identifier ignored_any
+    }
+
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: de::Visitor<'de>,
     {
         visitor.visit_seq(self)
-    }
-
-    forward_to_deserialize_any! {
-        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
-        bytes byte_buf option unit unit_struct newtype_struct seq tuple
-        struct tuple_struct map enum identifier ignored_any
     }
 }
 
@@ -103,7 +106,10 @@ impl<'de, 'p> de::SeqAccess<'de> for SeqDeserializer<'p> {
         Some(self.parameters.len())
     }
 
-    fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
+    fn next_element_seed<T>(
+        &mut self,
+        seed: T,
+    ) -> Result<Option<T::Value>, Self::Error>
     where
         T: de::DeserializeSeed<'de>,
     {

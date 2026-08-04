@@ -48,7 +48,10 @@ pub struct TokenizeFailed {
 }
 
 impl fmt::Debug for TokenizeFailed {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::result::Result<(), fmt::Error> {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> std::result::Result<(), fmt::Error> {
         write!(
             f,
             "Error while tokenizing STEP input\n{}",
@@ -60,7 +63,10 @@ impl fmt::Debug for TokenizeFailed {
 
 // Use same output as Debug
 impl fmt::Display for TokenizeFailed {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::result::Result<(), fmt::Error> {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> std::result::Result<(), fmt::Error> {
         fmt::Debug::fmt(self, f)
     }
 }
@@ -68,7 +74,10 @@ impl fmt::Display for TokenizeFailed {
 impl std::error::Error for TokenizeFailed {}
 
 impl TokenizeFailed {
-    pub fn new(input: &str, err: nom_language::error::VerboseError<&str>) -> Self {
+    pub fn new(
+        input: &str,
+        err: nom_language::error::VerboseError<&str>,
+    ) -> Self {
         TokenizeFailed {
             rendered_error: nom_language::error::convert_error(input, err),
         }

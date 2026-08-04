@@ -24,7 +24,8 @@ impl Input {
         let name = ident.to_string().to_screaming_snake_case();
         let holder_ident = as_holder_ident(ident);
         let holder_visitor_ident = as_visitor_ident(&holder_ident);
-        let variants: Vec<syn::Ident> = e.variants.iter().map(|var| var.ident.clone()).collect();
+        let variants: Vec<syn::Ident> =
+            e.variants.iter().map(|var| var.ident.clone()).collect();
         let variant_names: Vec<_> = variants
             .iter()
             .map(|id| id.to_string().to_screaming_snake_case())
@@ -50,9 +51,11 @@ impl Input {
                     if place_holder {
                         // ENTITY case
                         holder_types.push(as_holder_path(&f.ty));
-                        holder_exprs.push(quote! { Box::new(sub.into_owned(table)?) });
+                        holder_exprs
+                            .push(quote! { Box::new(sub.into_owned(table)?) });
                         variant_exprs.push(quote! { Box::new(owned) });
-                        variant_into_exprs.push(quote! { Box::new(owned.into()) });
+                        variant_into_exprs
+                            .push(quote! { Box::new(owned.into()) });
                     } else {
                         abort_call_site!("Simple type should not be Boxed")
                     }
@@ -237,7 +240,9 @@ impl Input {
             if *place_holder {
                 vars.push(var);
                 exprs.push(expr);
-                if let FieldType::Boxed(path) = holder.clone().try_into().unwrap() {
+                if let FieldType::Boxed(path) =
+                    holder.clone().try_into().unwrap()
+                {
                     holders.push(path.as_ref().clone().into());
                 } else {
                     holders.push(holder.clone());
@@ -268,7 +273,11 @@ impl Input {
     }
 }
 
-pub fn derive_holder(ident: &syn::Ident, e: &syn::DataEnum, attr: &HolderAttr) -> TokenStream2 {
+pub fn derive_holder(
+    ident: &syn::Ident,
+    e: &syn::DataEnum,
+    attr: &HolderAttr,
+) -> TokenStream2 {
     let input = Input::parse(ident, e, attr);
     let def_holder_tt = input.def_holder();
     let impl_holder_tt = input.impl_holder();
@@ -292,6 +301,9 @@ pub fn derive_holder(ident: &syn::Ident, e: &syn::DataEnum, attr: &HolderAttr) -
     }
 }
 
-pub fn derive_deserialize(_ident: &syn::Ident, _e: &syn::DataEnum) -> TokenStream2 {
+pub fn derive_deserialize(
+    _ident: &syn::Ident,
+    _e: &syn::DataEnum,
+) -> TokenStream2 {
     unimplemented!()
 }

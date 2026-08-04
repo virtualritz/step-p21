@@ -3,7 +3,7 @@ use super::*;
 use proc_macro_error2::{Diagnostic, Level};
 use std::convert::{TryFrom, TryInto};
 
-/// espr-generated field type
+/// step_p11-generated field type
 #[derive(Debug, Clone)]
 pub enum FieldType {
     /// Like `T`
@@ -55,7 +55,8 @@ impl FieldType {
         let step_p21 = step_p21_crate();
         match self {
             FieldType::Path(path) => {
-                let path = syn::parse_quote! { #step_p21::tables::PlaceHolder<#path> };
+                let path =
+                    syn::parse_quote! { #step_p21::tables::PlaceHolder<#path> };
                 FieldType::Path(path)
             }
             FieldType::Optional(ty) => {
@@ -81,7 +82,7 @@ impl From<UnsupportedTypeError> for Diagnostic {
     fn from(_: UnsupportedTypeError) -> Self {
         Self::new(
             Level::Error,
-            "Unsupported Type for step_p21 and espr".to_string(),
+            "Unsupported Type for step_p21 and step_p11".to_string(),
         )
     }
 }
@@ -127,10 +128,9 @@ impl TryFrom<syn::Type> for FieldType {
 
         match &last_seg.arguments {
             syn::PathArguments::None => Ok(FieldType::Path(path.clone())),
-            syn::PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
-                args,
-                ..
-            }) => {
+            syn::PathArguments::AngleBracketed(
+                syn::AngleBracketedGenericArguments { args, .. },
+            ) => {
                 assert_eq!(args.len(), 1);
                 if let syn::GenericArgument::Type(ty) = &args[0] {
                     let ty = Box::new(ty.clone().try_into()?);
@@ -214,28 +214,33 @@ mod tests {
         let ty: syn::Type = syn::parse_str("T").unwrap();
         let f: FieldType = ty.try_into().unwrap();
         let place_holder = f.into_holder().into_place_holder();
-        let ans: syn::Type = syn::parse_str("::step_p21::tables::PlaceHolder<THolder>").unwrap();
+        let ans: syn::Type =
+            syn::parse_str("::step_p21::tables::PlaceHolder<THolder>").unwrap();
         assert_eq!(<FieldType as Into<syn::Type>>::into(place_holder), ans);
 
         let ty: syn::Type = syn::parse_str("Option<T>").unwrap();
         let f: FieldType = ty.try_into().unwrap();
         let place_holder = f.into_holder().into_place_holder();
         let ans: syn::Type =
-            syn::parse_str("Option<::step_p21::tables::PlaceHolder<THolder>>").unwrap();
+            syn::parse_str("Option<::step_p21::tables::PlaceHolder<THolder>>")
+                .unwrap();
         assert_eq!(<FieldType as Into<syn::Type>>::into(place_holder), ans);
 
         let ty: syn::Type = syn::parse_str("Vec<T>").unwrap();
         let f: FieldType = ty.try_into().unwrap();
         let place_holder = f.into_holder().into_place_holder();
         let ans: syn::Type =
-            syn::parse_str("Vec<::step_p21::tables::PlaceHolder<THolder>>").unwrap();
+            syn::parse_str("Vec<::step_p21::tables::PlaceHolder<THolder>>")
+                .unwrap();
         assert_eq!(<FieldType as Into<syn::Type>>::into(place_holder), ans);
 
         let ty: syn::Type = syn::parse_str("Option<Vec<T>>").unwrap();
         let f: FieldType = ty.try_into().unwrap();
         let place_holder = f.into_holder().into_place_holder();
-        let ans: syn::Type =
-            syn::parse_str("Option<Vec<::step_p21::tables::PlaceHolder<THolder>>>").unwrap();
+        let ans: syn::Type = syn::parse_str(
+            "Option<Vec<::step_p21::tables::PlaceHolder<THolder>>>",
+        )
+        .unwrap();
         assert_eq!(<FieldType as Into<syn::Type>>::into(place_holder), ans);
     }
 }

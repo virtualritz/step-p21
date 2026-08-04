@@ -19,6 +19,9 @@ pub fn reference_list(input: &str) -> ParseResult<'_, Vec<ReferenceEntry>> {
 /// reference = [lhs_occurrence_name] `=` [resource] `;` .
 pub fn reference(input: &str) -> ParseResult<'_, ReferenceEntry> {
     tuple_((lhs_occurrence_name, char_('='), resource, char_(';')))
-        .map(|(name, _def, resource, _semicolon)| ReferenceEntry { name, resource })
+        .map(|(name, _def, resource, _semicolon)| ReferenceEntry {
+            name,
+            resource,
+        })
         .parse(input)
 }

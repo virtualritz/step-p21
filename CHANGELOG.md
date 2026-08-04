@@ -14,10 +14,10 @@ entry cannot carry a fix to downstream users.
   through the public `parse` and `exchange::parameter` entry points: `''` as an
   escaped apostrophe, and `()` as an empty aggregate. Upstream covered each
   sub-parser; these cover the API a caller actually uses.
-- `espr` / `espr-derive` retained unrenamed and unpublished: they are the
+- `step-p11` / `step-p11-derive` retained unrenamed and unpublished: they are the
   EXPRESS (Part 11) compiler, kept because this workspace's tests use
-  `espr_derive::inline_express!` to exercise the `Holder`/table machinery.
-- Inline `insta` snapshots in `espr/tests` were re-ordered: the rename changes
+  `step_p11_derive::inline_express!` to exercise the `Holder`/table machinery.
+- Inline `insta` snapshots in `step-p11/tests` were re-ordered: the rename changes
   how rustfmt sorts the generated `use` lines. Generated code is otherwise
   unchanged.
 
@@ -71,7 +71,7 @@ In addition to original Keep-a-Changelog, we use following rules:
 - Document for step-p21::header https://github.com/ricosjp/step-p21/pull/218
 - Design document of step-p21 crate https://github.com/ricosjp/step-p21/pull/214
 - Term and definitions https://github.com/ricosjp/step-p21/pull/210
-- Introduction to STEP, espr design document https://github.com/ricosjp/step-p21/pull/208
+- Introduction to STEP, step-p11 design document https://github.com/ricosjp/step-p21/pull/208
 - Formal approach for instantiable complex entity https://github.com/ricosjp/step-p21/pull/203
 - Partial complex entities described in ISO-10303-11 Annex B https://github.com/ricosjp/step-p21/pull/200
 
@@ -104,7 +104,7 @@ In addition to original Keep-a-Changelog, we use following rules:
 - `ast::Component` trait for converting from String to AST https://github.com/ricosjp/step-p21/pull/168
 - Add fields for tuple structs to `Table`. https://github.com/ricosjp/step-p21/pull/151
 - Expose the module `derive_more` in `step-p21`. https://github.com/ricosjp/step-p21/pull/144
-- espr_derive crate, `espr_derive::inline_express!` macro https://github.com/ricosjp/step-p21/pull/158
+- step_p11_derive crate, `step_p11_derive::inline_express!` macro https://github.com/ricosjp/step-p21/pull/158
 - Expose `step_p21_derive::*` macros in `step-p21::` namespace https://github.com/ricosjp/step-p21/pull/159
 - `#[derive(Holder)]` for tuple struct https://github.com/ricosjp/step-p21/pull/146
 - Overview diagram written in asciiflow https://github.com/ricosjp/step-p21/pull/137
@@ -133,12 +133,12 @@ In addition to original Keep-a-Changelog, we use following rules:
 - Replace `SeqDeserializer` https://github.com/ricosjp/step-p21/pull/194
 - Use `Record` struct in `Parameter::Typed` https://github.com/ricosjp/step-p21/pull/192
 - Drop type parameter `T` in `SingleMapDeserializer` https://github.com/ricosjp/step-p21/pull/191
-- Use `syn::Type` and other explicit types instead of `proc_macro2::TokenStream` in espr/codegen https://github.com/ricosjp/step-p21/pull/184
+- Use `syn::Type` and other explicit types instead of `proc_macro2::TokenStream` in step-p11/codegen https://github.com/ricosjp/step-p21/pull/184
 - Legalize the type declare of `SET` and `LIST`. https://github.com/ricosjp/step-p21/pull/171
 - Snapshot testing for step-p21-derive https://github.com/ricosjp/step-p21/pull/175
-- Refactoring `espr::codegen` https://github.com/ricosjp/step-p21/pull/165
+- Refactoring `step-p11::codegen` https://github.com/ricosjp/step-p21/pull/165
 - ignore pending snapshot https://github.com/ricosjp/step-p21/pull/164
-- Snapshot testing for espr https://github.com/ricosjp/step-p21/pull/163
+- Snapshot testing for step-p11 https://github.com/ricosjp/step-p21/pull/163
 - step-p21/tests uses `inline_express!` macro https://github.com/ricosjp/step-p21/pull/160
 - Add flag to switch step-p21 internal/external codegen in IR::to_token_stream https://github.com/ricosjp/step-p21/pull/158
 - Use rust-cache for faster CI https://github.com/ricosjp/step-p21/pull/156

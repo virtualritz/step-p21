@@ -18,7 +18,7 @@ pub fn as_holder_path(input: &syn::Type) -> syn::Type {
     let ft: FieldType = input
         .clone()
         .try_into()
-        .expect_or_abort("as_holder! only accepts espr-generated type");
+        .expect_or_abort("as_holder! only accepts step_p11-generated type");
     ft.into_holder().into()
 }
 

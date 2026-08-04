@@ -29,7 +29,8 @@ pub fn anchor(input: &str) -> ParseResult<'_, Anchor> {
     .parse(input)
 }
 
-/// anchor_item = `$` | [integer] | [real] | [string] | [enumeration] | binary | [rhs_occurrence_name] | [resource] | [anchor_item_list] .
+/// anchor_item = `$` | [integer] | [real] | [string] | [enumeration] | binary |
+/// [rhs_occurrence_name] | [resource] | [anchor_item_list] .
 pub fn anchor_item(input: &str) -> ParseResult<'_, AnchorItem> {
     alt((
         char_('$').map(|_| AnchorItem::NotProvided),
@@ -47,7 +48,9 @@ pub fn anchor_item(input: &str) -> ParseResult<'_, AnchorItem> {
 /// anchor_item_list = `(` \[ [anchor_item] { `,` [anchor_item] } \] `)` .
 pub fn anchor_item_list(input: &str) -> ParseResult<'_, AnchorItem> {
     tuple_((char_('('), opt_(comma_separated(anchor_item)), char_(')')))
-        .map(|(_open, anchors, _close)| AnchorItem::List(anchors.unwrap_or_default()))
+        .map(|(_open, anchors, _close)| {
+            AnchorItem::List(anchors.unwrap_or_default())
+        })
         .parse(input)
 }
 

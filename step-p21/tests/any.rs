@@ -3,7 +3,7 @@ use serde::Deserialize;
 use std::str::FromStr;
 use step_p21::{ast::*, parser::exchange, tables::*};
 
-espr_derive::inline_express!(
+step_p11_derive::inline_express!(
     r#"
     SCHEMA test_schema;
       ENTITY base SUPERTYPE OF (ONEOF (sub1, sub2));
@@ -33,7 +33,8 @@ ENDSEC;
 
 #[test]
 fn deserialize_base() {
-    let (residual, p): (_, Record) = exchange::simple_record("BASE(1.0)").finish().unwrap();
+    let (residual, p): (_, Record) =
+        exchange::simple_record("BASE(1.0)").finish().unwrap();
     dbg!(&p);
     assert_eq!(residual, "");
 
@@ -60,7 +61,8 @@ fn deserialize_sub1() {
     );
 
     fn test(input: &str, answer: Sub1Holder) {
-        let (residual, p): (_, Record) = exchange::simple_record(input).finish().unwrap();
+        let (residual, p): (_, Record) =
+            exchange::simple_record(input).finish().unwrap();
         dbg!(&p);
         assert_eq!(residual, "");
 
@@ -88,7 +90,8 @@ fn deserialize_base_any() {
     );
 
     fn test(input: &str, answer: BaseAnyHolder) {
-        let (residual, p): (_, Record) = exchange::simple_record(input).finish().unwrap();
+        let (residual, p): (_, Record) =
+            exchange::simple_record(input).finish().unwrap();
         dbg!(&p);
         assert_eq!(residual, "");
 
@@ -116,11 +119,13 @@ fn deserialize_base_any_placeholder() {
     );
 
     fn test(input: &str, answer: PlaceHolder<BaseAnyHolder>) {
-        let (residual, p): (_, Record) = exchange::simple_record(input).finish().unwrap();
+        let (residual, p): (_, Record) =
+            exchange::simple_record(input).finish().unwrap();
         dbg!(&p);
         assert_eq!(residual, "");
 
-        let a: PlaceHolder<BaseAnyHolder> = Deserialize::deserialize(&p).unwrap();
+        let a: PlaceHolder<BaseAnyHolder> =
+            Deserialize::deserialize(&p).unwrap();
         dbg!(&a);
         assert_eq!(a, answer);
     }
@@ -146,7 +151,8 @@ fn into_base_any() {
     fn test(input: &str, answer: BaseAny) {
         let table = Tables::from_str(EXAMPLE).unwrap();
 
-        let (residual, p): (_, Record) = exchange::simple_record(input).finish().unwrap();
+        let (residual, p): (_, Record) =
+            exchange::simple_record(input).finish().unwrap();
         dbg!(&p);
         assert_eq!(residual, "");
 

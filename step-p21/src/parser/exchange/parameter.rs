@@ -7,7 +7,9 @@ use nom::{Parser, branch::alt, combinator::value};
 /// list = `(` \[ [parameter] { `,` [parameter] } \] `)` .
 pub fn list(input: &str) -> ParseResult<'_, Parameter> {
     tuple_((char_('('), opt_(comma_separated(parameter)), char_(')')))
-        .map(|(_open, params, _close)| Parameter::List(params.unwrap_or_default()))
+        .map(|(_open, params, _close)| {
+            Parameter::List(params.unwrap_or_default())
+        })
         .parse(input)
 }
 
@@ -26,7 +28,8 @@ pub fn typed_parameter(input: &str) -> ParseResult<'_, Parameter> {
         .parse(input)
 }
 
-/// untyped_parameter = `$` | [integer] | [real] | [string] | [rhs_occurrence_name] | [enumeration] | binary | [list] .
+/// untyped_parameter = `$` | [integer] | [real] | [string] |
+/// [rhs_occurrence_name] | [enumeration] | binary | [list] .
 pub fn untyped_parameter(input: &str) -> ParseResult<'_, Parameter> {
     alt((
         char_('$').map(|_| Parameter::NotProvided),
@@ -69,7 +72,8 @@ mod tests {
 
     #[test]
     fn parameter_list() {
-        let (res, record) = super::untyped_parameter("(1, 2, 3)").finish().unwrap();
+        let (res, record) =
+            super::untyped_parameter("(1, 2, 3)").finish().unwrap();
         assert_eq!(res, "");
         assert_eq!(
             record,

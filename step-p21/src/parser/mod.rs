@@ -1,6 +1,7 @@
 //! Tokenize exchange structure string into [ast]
 //!
-//! ASCII encoding of exchange structure, a.k.a. STEP file, consists of following sections:
+//! ASCII encoding of exchange structure, a.k.a. STEP file, consists of
+//! following sections:
 //!
 //! - HEADER
 //! - ANCHOR (optional)
@@ -10,8 +11,8 @@
 //!
 //! ANCHOR, REFERENCE, and SIGNATURE sections are optional.
 //! The syntax of STEP-file is common through schemas,
-//! i.e. the tokenize of STEP-file can be done without reading any EXPRESS schema.
-//! A target schema is specified in the HEADER section,
+//! i.e. the tokenize of STEP-file can be done without reading any EXPRESS
+//! schema. A target schema is specified in the HEADER section,
 //! and it determines how we should understand AST.
 //!
 //! Example

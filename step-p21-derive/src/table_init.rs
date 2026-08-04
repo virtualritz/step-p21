@@ -17,7 +17,10 @@ pub fn derive_table_init(ast: &syn::DeriveInput) -> TokenStream2 {
     }
 }
 
-fn entity_impl_table_init(ident: &syn::Ident, st: &syn::DataStruct) -> TokenStream2 {
+fn entity_impl_table_init(
+    ident: &syn::Ident,
+    st: &syn::DataStruct,
+) -> TokenStream2 {
     let mut table_names = Vec::new();
     let mut entity_names = Vec::new();
     for field in &st.fields {
@@ -66,13 +69,16 @@ fn entity_impl_table_init(ident: &syn::Ident, st: &syn::DataStruct) -> TokenStre
             fn from_str(input: &str) -> #step_p21::error::Result<Self> {
                 use #step_p21::{tables::TableInit, ast::DataSection};
                 let data_sec = DataSection::from_str(input)?;
-                Ok(Self::from_data_section(&data_sec)?)
+                Self::from_data_section(&data_sec)
             }
         }
     }
 }
 
-fn tuple_impl_table_init(ident: &syn::Ident, st: &syn::DataStruct) -> TokenStream2 {
+fn tuple_impl_table_init(
+    ident: &syn::Ident,
+    st: &syn::DataStruct,
+) -> TokenStream2 {
     let mut table_names = Vec::new();
     let mut entity_names = Vec::new();
     for field in &st.fields {
@@ -121,7 +127,7 @@ fn tuple_impl_table_init(ident: &syn::Ident, st: &syn::DataStruct) -> TokenStrea
             fn from_str(input: &str) -> #step_p21::error::Result<Self> {
                 use #step_p21::{tables::TableInit, ast::DataSection};
                 let data_sec = DataSection::from_str(input)?;
-                Ok(Self::from_data_section(&data_sec)?)
+                Self::from_data_section(&data_sec)
             }
         }
     }

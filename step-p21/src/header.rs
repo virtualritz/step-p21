@@ -16,9 +16,8 @@
 //!
 //! These entities are defined in [ISO-10303-21 "8.2 Header section declarations"](https://www.iso.org/standard/63141.html)
 //! using EXPRESS schemas.
-//! Although we can generate corresponding Rust struct using espr compiler,
+//! Although we can generate corresponding Rust struct using step_p11 compiler,
 //! we write these definitions manually to keep development process simple.
-//!
 
 use crate::{ast::*, error::Result};
 use serde::Deserialize;
@@ -62,7 +61,8 @@ pub struct FileDescription {
 #[derive(Debug, Clone, PartialEq, step_p21_derive::Deserialize)]
 pub struct FileName {
     pub name: String,
-    /// ISO-8601 formatted date and time specifying when the exchange structure was created.
+    /// ISO-8601 formatted date and time specifying when the exchange structure
+    /// was created.
     pub time_stamp: String,
     pub author: Vec<String>,
     pub organization: Vec<String>,
@@ -93,7 +93,6 @@ pub struct FileSchema {
 ///
 /// There is a schema for HEADER section,
 /// but we do not generate this structure from it to simplify build process.
-///
 #[derive(Debug, Clone, PartialEq)]
 pub struct Header {
     pub file_description: FileDescription,
@@ -129,9 +128,10 @@ mod tests {
             FILE_SCHEMA( ( 'AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }' ) );
         ENDSEC;
         "#.trim();
-        let (_residual, records) = crate::parser::exchange::header_section(header)
-            .finish()
-            .unwrap();
+        let (_residual, records) =
+            crate::parser::exchange::header_section(header)
+                .finish()
+                .unwrap();
         let header = super::Header::from_records(&records).unwrap();
         dbg!(header);
     }

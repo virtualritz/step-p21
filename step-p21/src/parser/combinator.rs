@@ -48,7 +48,9 @@ pub fn tag_<'a>(name: &'static str) -> impl ExchangeParser<'a, &'a str> {
     }
 }
 
-pub fn opt_<'a, O>(f: impl ExchangeParser<'a, O>) -> impl ExchangeParser<'a, Option<O>> {
+pub fn opt_<'a, O>(
+    f: impl ExchangeParser<'a, O>,
+) -> impl ExchangeParser<'a, Option<O>> {
     move |input| {
         let (input, c) = nom::combinator::opt(f.clone()).parse(input)?;
         Ok((input, c))
@@ -61,8 +63,8 @@ pub fn opt_<'a, O>(f: impl ExchangeParser<'a, O>) -> impl ExchangeParser<'a, Opt
 /// followed by any number of characters from the basic alphabet,
 /// and terminated by an asterisk solidus `*/`
 ///
-/// These comments are dropped while parsing. Do not passed to following convert step.
-///
+/// These comments are dropped while parsing. Do not passed to following convert
+/// step.
 pub fn comment(input: &str) -> ParseResult<'_, String> {
     let internal = alt((
         none_of("*"),
@@ -81,26 +83,31 @@ pub fn comment(input: &str) -> ParseResult<'_, String> {
 /// FIXME
 /// ------
 /// - support explicit print control directives
-///
 pub fn separator(input: &str) -> ParseResult<'_, ()> {
     let comment = many1(tuple((multispace0, comment, multispace0))).map(|_| ());
     alt((comment, value((), multispace1))).parse(input)
 }
 
-pub fn many0_<'a, O>(f: impl ExchangeParser<'a, O>) -> impl ExchangeParser<'a, Vec<O>> {
+pub fn many0_<'a, O>(
+    f: impl ExchangeParser<'a, O>,
+) -> impl ExchangeParser<'a, Vec<O>> {
     move |input| {
         let (input, first) = opt(f.clone()).parse(input)?;
         if first.is_none() {
             return Ok((input, Vec::new()));
         };
-        let (input, tail) = many0(tuple((ignorable, f.clone())).map(|(_sep, v)| v)).parse(input)?;
+        let (input, tail) =
+            many0(tuple((ignorable, f.clone())).map(|(_sep, v)| v))
+                .parse(input)?;
         let first = vec![first.unwrap()];
         let list = first.into_iter().chain(tail).collect();
         Ok((input, list))
     }
 }
 
-pub fn many1_<'a, O>(f: impl ExchangeParser<'a, O>) -> impl ExchangeParser<'a, Vec<O>> {
+pub fn many1_<'a, O>(
+    f: impl ExchangeParser<'a, O>,
+) -> impl ExchangeParser<'a, Vec<O>> {
     move |input| {
         tuple((f.clone(), many0(tuple((ignorable, f.clone())))))
             .map(|(first, tail)| {
@@ -117,7 +124,10 @@ pub fn ignorable(input: &str) -> ParseResult<'_, ()> {
     alt((comment, value((), multispace0))).parse(input)
 }
 
-pub fn separated<'a, O>(c: char, f: impl ExchangeParser<'a, O>) -> impl ExchangeParser<'a, Vec<O>> {
+pub fn separated<'a, O>(
+    c: char,
+    f: impl ExchangeParser<'a, O>,
+) -> impl ExchangeParser<'a, Vec<O>> {
     move |input| {
         tuple((
             f.clone(),
@@ -135,12 +145,16 @@ pub fn separated<'a, O>(c: char, f: impl ExchangeParser<'a, O>) -> impl Exchange
     }
 }
 
-pub fn comma_separated<'a, O>(f: impl ExchangeParser<'a, O>) -> impl ExchangeParser<'a, Vec<O>> {
+pub fn comma_separated<'a, O>(
+    f: impl ExchangeParser<'a, O>,
+) -> impl ExchangeParser<'a, Vec<O>> {
     separated(',', f)
 }
 
 /// Sequence of separated tokens
-pub fn tuple_<'a, O, List: Tuple<'a, O>>(mut l: List) -> impl ExchangeParser<'a, O> {
+pub fn tuple_<'a, O, List: Tuple<'a, O>>(
+    mut l: List,
+) -> impl ExchangeParser<'a, O> {
     move |input| l.parse(input)
 }
 
@@ -149,7 +163,8 @@ pub trait Tuple<'a, O>: Clone {
     fn parse(&mut self, input: &'a str) -> ParseResult<'a, O>;
 }
 
-/// Expand `tuple_gen!(f1, f2, f3)` to `tuple((f1, ignorable, tuple((f2, ignorable, f3))))`
+/// Expand `tuple_gen!(f1, f2, f3)` to `tuple((f1, ignorable, tuple((f2,
+/// ignorable, f3))))`
 macro_rules! tuple_gen {
     ($head:ident, $($tail:ident),*) => {
         tuple(($head.clone(), ignorable, tuple_gen!($($tail),*)))
@@ -234,6 +249,15 @@ impl_tuple!(
     o1, o2, o3, o4, o5, o6, o7, o8, o9
 );
 
+/// Identity shim for nom 7's `sequence::tuple`, which nom 8 removed.
+///
+/// nom 8 implements `Parser` for tuples directly, so wrapping is no longer
+/// needed -- but keeping the call sites spelled `tuple((a, b, c))` states the
+/// intent, and matches how the WSN productions read in the standard.
+pub fn tuple<T>(parsers: T) -> T {
+    parsers
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -300,7 +324,8 @@ mod tests {
 
     #[test]
     fn many0() {
-        let (res, digits) = many0_digit("1 /* comment */ 2 3").finish().unwrap();
+        let (res, digits) =
+            many0_digit("1 /* comment */ 2 3").finish().unwrap();
         assert_eq!(res, "");
         assert_eq!(digits, &['1', '2', '3']);
 
@@ -330,7 +355,8 @@ mod tests {
 
     #[test]
     fn many1() {
-        let (res, digits) = many1_digit("1 /* comment */ 2 3").finish().unwrap();
+        let (res, digits) =
+            many1_digit("1 /* comment */ 2 3").finish().unwrap();
         assert_eq!(res, "");
         assert_eq!(digits, &['1', '2', '3']);
 
@@ -393,13 +419,4 @@ mod tests {
         assert_eq!(res, "");
         assert_eq!(digits, &['1', '2']);
     }
-}
-
-/// Identity shim for nom 7's `sequence::tuple`, which nom 8 removed.
-///
-/// nom 8 implements `Parser` for tuples directly, so wrapping is no longer
-/// needed -- but keeping the call sites spelled `tuple((a, b, c))` states the
-/// intent, and matches how the WSN productions read in the standard.
-pub fn tuple<T>(parsers: T) -> T {
-    parsers
 }

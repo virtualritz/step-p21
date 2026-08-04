@@ -1,0 +1,45 @@
+[package]
+# NEVER published. This is a MODIFIED fork of `espr`: its codegen emits
+# `::step_p21` paths, so it can no longer generate code for upstream `ruststep`
+# and is not the crate that sits on crates.io under the old name. It is kept
+# because this workspace's tests drive the `Holder`/table machinery through
+# `inline_express!`, and it reaches consumers only as a path-only
+# dev-dependency, which cargo strips at publish.
+publish = false
+name = "step-p11"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+description   = "EXPRESS Language compiler"
+documentation = "https://docs.rs/step-p11"
+repository.workspace = true
+keywords      = ["step", "cad", "compiler"]
+license.workspace = true
+readme        = "../README.md"
+categories    = ["science", "development-tools"]
+
+[dependencies]
+# For parser
+# Pinned to 7 deliberately: see the workspace manifest.
+nom = "7"
+
+# For Rust code generation
+syn = { workspace = true }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }
+
+# Utilities
+Inflector = { workspace = true }
+derive_more = { workspace = true }
+itertools = { workspace = true }
+maplit = { workspace = true }
+thiserror = { workspace = true }
+clap = { workspace = true }
+check_keyword = { workspace = true }
+katexit = { workspace = true }
+
+[dev-dependencies]
+insta = { workspace = true }
+maplit = { workspace = true }

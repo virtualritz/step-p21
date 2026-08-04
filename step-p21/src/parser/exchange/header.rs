@@ -4,7 +4,8 @@ use crate::{
 };
 use nom::Parser;
 
-/// header_section = `HEADER;` [header_entity] [header_entity] [header_entity] \[ [header_entity_list] \] `ENDSEC;` .
+/// header_section = `HEADER;` [header_entity] [header_entity] [header_entity]
+/// \[ [header_entity_list] \] `ENDSEC;` .
 pub fn header_section(input: &str) -> ParseResult<'_, Vec<Record>> {
     tuple_((tag_("HEADER;"), header_entity_list, tag_("ENDSEC;")))
         .map(|(_start, entities, _close)| entities)

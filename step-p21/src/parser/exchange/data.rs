@@ -4,7 +4,8 @@ use crate::{
 };
 use nom::{Parser, branch::alt};
 
-/// data_section = `DATA` \[ `(` [parameter_list] `)` \] `;` [entity_instance_list] `ENDSEC;` .
+/// data_section = `DATA` \[ `(` [parameter_list] `)` \] `;`
+/// [entity_instance_list] `ENDSEC;` .
 pub fn data_section(input: &str) -> ParseResult<'_, DataSection> {
     tuple_((
         tag_("DATA"),
@@ -23,7 +24,9 @@ pub fn data_section(input: &str) -> ParseResult<'_, DataSection> {
 }
 
 /// entity_instance_list = { [entity_instance] } .
-pub fn entity_instance_list(input: &str) -> ParseResult<'_, Vec<EntityInstance>> {
+pub fn entity_instance_list(
+    input: &str,
+) -> ParseResult<'_, Vec<EntityInstance>> {
     many0_(entity_instance).parse(input)
 }
 
@@ -35,7 +38,10 @@ pub fn entity_instance(input: &str) -> ParseResult<'_, EntityInstance> {
 /// simple_entity_instance = [entity_instance_name] `=` [simple_record] `;` .
 pub fn simple_entity_instance(input: &str) -> ParseResult<'_, EntityInstance> {
     tuple_((entity_instance_name, char_('='), simple_record, char_(';')))
-        .map(|(id, _eq, record, _semicolon)| EntityInstance::Simple { id, record })
+        .map(|(id, _eq, record, _semicolon)| EntityInstance::Simple {
+            id,
+            record,
+        })
         .parse(input)
 }
 
@@ -47,7 +53,10 @@ pub fn complex_entity_instance(input: &str) -> ParseResult<'_, EntityInstance> {
         subsuper_record,
         char_(';'),
     ))
-    .map(|(id, _eq, subsuper, _semicolon)| EntityInstance::Complex { id, subsuper })
+    .map(|(id, _eq, subsuper, _semicolon)| EntityInstance::Complex {
+        id,
+        subsuper,
+    })
     .parse(input)
 }
 

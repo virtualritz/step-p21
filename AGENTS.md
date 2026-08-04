@@ -33,8 +33,8 @@ It does **not** own the *vocabulary*. What `PLANE`, `ADVANCED_FACE` or
 (AP203, AP214, AP242) -- a consumer's concern. Keep that boundary: entity
 semantics belong in the consumer, not here.
 
-`espr` and `espr-derive` are the EXPRESS (Part 11) schema compiler. They are
-retained because this workspace's own tests use `espr_derive::inline_express!` to
+`step-p11` and `step-p11-derive` are the EXPRESS (Part 11) schema compiler. They are
+retained because this workspace's own tests use `step_p11_derive::inline_express!` to
 exercise the `Holder`/table machinery, and they are **not published**.
 
 ## Build, Test, and Development Commands
@@ -51,7 +51,7 @@ cargo fmt --all
 cargo clippy --workspace --all-targets
 ```
 
-`espr/tests/*.rs` use **inline** `insta` snapshots, which live in the test source
+`step-p11/tests/*.rs` use **inline** `insta` snapshots, which live in the test source
 rather than in `.snap` files. `INSTA_UPDATE` will not rewrite them; use
 `cargo insta` or edit the literal. A rename that changes how `rustfmt` sorts the
 generated `use` lines will move those snapshots -- that is expected, but read the

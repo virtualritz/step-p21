@@ -6,7 +6,6 @@
 //! - `#[holder(field = {field_ident})]`
 //! - `#[holder(use_place_holder)]`
 //! - `#[holder(generate_deserialize)]`
-//!
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct HolderAttr {
@@ -98,7 +97,8 @@ mod tests {
         let attr: Attr = syn::parse_str("table = Tables").unwrap();
         assert_eq!(attr, Attr::Table(syn::parse_str("Tables").unwrap()));
 
-        let attr: Attr = syn::parse_str("table = ::some::path::to::Tables").unwrap();
+        let attr: Attr =
+            syn::parse_str("table = ::some::path::to::Tables").unwrap();
         assert_eq!(
             attr,
             Attr::Table(syn::parse_str("::some::path::to::Tables").unwrap())

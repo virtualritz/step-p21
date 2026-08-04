@@ -3,7 +3,8 @@
 //! Since records in an exchange structure has references to other records,
 //! then consists a graph.
 //!
-//! - An exchange structure corresponds to a graph, we call it "exchange structure graph" here.
+//! - An exchange structure corresponds to a graph, we call it "exchange
+//!   structure graph" here.
 //! - A node of graph corresponds to a record.
 //! - An edge of graph corresponds to a reference in a record.
 //!
@@ -23,7 +24,8 @@
 //! END_ENTITY;
 //! ```
 //!
-//! Corresponding data section in STEP file will be something like following (skip HEADER section):
+//! Corresponding data section in STEP file will be something like following
+//! (skip HEADER section):
 //!
 //! ```text
 //! DATA;
@@ -55,27 +57,27 @@
 //! | `#6`      | 8       | `A((9, 10))` |
 //!
 //! Each columns are defined by EXPRESS schema.
-//! `x`, `y`, and `z` are specified as integer in EXPRESS, and will be treated as `i64` in Rust code.
-//! The simple types in EXPRESS are mapped into Rust primitive types.
-//! The ENTITY `a` will be treated as a Rust struct like
+//! `x`, `y`, and `z` are specified as integer in EXPRESS, and will be treated
+//! as `i64` in Rust code. The simple types in EXPRESS are mapped into Rust
+//! primitive types. The ENTITY `a` will be treated as a Rust struct like
 //!
 //! ```
 //! struct A {
-//!   x: i64,
-//!   y: i64,
+//!     x: i64,
+//!     y: i64,
 //! }
 //! ```
 //!
-//! The ENTITY `b` has to support both reference and inline struct like as `#4` and `#6`.
-//! For this purpose, [PlaceHolder] exists:
+//! The ENTITY `b` has to support both reference and inline struct like as `#4`
+//! and `#6`. For this purpose, [PlaceHolder] exists:
 //!
 //! ```
 //! # use step_p21::ast::Name;
 //! enum PlaceHolder<T> {
-//!   /// For reference, e.g. `#1`
-//!   Ref(Name),
-//!   /// For inline typed parameter, e.g. `A((9, 10))`
-//!   Owned(T),
+//!     /// For reference, e.g. `#1`
+//!     Ref(Name),
+//!     /// For inline typed parameter, e.g. `A((9, 10))`
+//!     Owned(T),
 //! }
 //! ```
 //!
@@ -86,12 +88,12 @@
 //! # struct A {}
 //! # struct AHolder {}
 //! struct B {
-//!   z: i64,
-//!   w: A,
+//!     z: i64,
+//!     w: A,
 //! }
 //! struct BHolder {
-//!   z: i64,
-//!   w: PlaceHolder<AHolder>,
+//!     z: i64,
+//!     w: PlaceHolder<AHolder>,
 //! }
 //! ```
 //!
@@ -99,7 +101,6 @@
 //! `BHolder` into owned struct `B`.
 //! `AHolder` will also be introduced to keep consistency.
 //! These are automated by [step_p21_derive::Holder] proc-macro.
-//!
 
 use crate::{ast::*, error::*};
 use serde::{
@@ -118,6 +119,7 @@ pub trait IntoOwned: Clone + 'static {
 impl<T: IntoOwned> IntoOwned for Vec<T> {
     type Owned = Vec<T::Owned>;
     type Table = T::Table;
+
     fn into_owned(self, table: &Self::Table) -> Result<Self::Owned> {
         self.into_iter().map(|x| x.into_owned(table)).collect()
     }
@@ -140,7 +142,9 @@ pub trait EntityTable<T: Holder<Table = Self>> {
     fn get_owned(&self, entity_id: u64) -> Result<T::Owned>;
 
     /// Get owned entities as an iterator
-    fn owned_iter<'table>(&'table self) -> Box<dyn Iterator<Item = Result<T::Owned>> + 'table>;
+    fn owned_iter<'table>(
+        &'table self,
+    ) -> Box<dyn Iterator<Item = Result<T::Owned>> + 'table>;
 }
 
 /// Create Table from [DataSection]
@@ -162,7 +166,11 @@ pub trait TableInit: Default {
     }
 }
 
-pub fn get_owned<T, Table>(table: &Table, map: &HashMap<u64, T>, entity_id: u64) -> Result<T::Owned>
+pub fn get_owned<T, Table>(
+    table: &Table,
+    map: &HashMap<u64, T>,
+    entity_id: u64,
+) -> Result<T::Owned>
 where
     T: Holder<Table = Table>,
     Table: EntityTable<T>,
@@ -217,12 +225,13 @@ where
 {
     type Owned = T::Owned;
     type Table = T::Table;
+
     /// Get owned value, or look up entity table and clone it for a reference.
     ///
     /// Errors
     /// -------
-    /// - if table lookup failed, i.e. unknown entity id not registered in the table
-    ///
+    /// - if table lookup failed, i.e. unknown entity id not registered in the
+    ///   table
     fn into_owned(self, table: &Self::Table) -> Result<T::Owned> {
         match self {
             PlaceHolder::Ref(id) => match id {
@@ -246,7 +255,9 @@ impl<T> From<Name> for PlaceHolder<T> {
     }
 }
 
-impl<'de, T: Holder + WithVisitor + Deserialize<'de>> Deserialize<'de> for PlaceHolder<T> {
+impl<'de, T: Holder + WithVisitor + Deserialize<'de>> Deserialize<'de>
+    for PlaceHolder<T>
+{
     fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
     where
         D: de::Deserializer<'de>,
@@ -271,7 +282,9 @@ impl<T> Default for PlaceHolderVisitor<T> {
     }
 }
 
-impl<'de, T: Deserialize<'de> + Holder + WithVisitor> de::Visitor<'de> for PlaceHolderVisitor<T> {
+impl<'de, T: Deserialize<'de> + Holder + WithVisitor> de::Visitor<'de>
+    for PlaceHolderVisitor<T>
+{
     type Value = PlaceHolder<T>;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -299,7 +312,10 @@ impl<'de, T: Deserialize<'de> + Holder + WithVisitor> de::Visitor<'de> for Place
         Ok(PlaceHolder::Owned(T::deserialize(v.into_deserializer())?))
     }
 
-    fn visit_seq<A>(self, seq: A) -> ::std::result::Result<Self::Value, A::Error>
+    fn visit_seq<A>(
+        self,
+        seq: A,
+    ) -> ::std::result::Result<Self::Value, A::Error>
     where
         A: de::SeqAccess<'de>,
     {
@@ -308,7 +324,10 @@ impl<'de, T: Deserialize<'de> + Holder + WithVisitor> de::Visitor<'de> for Place
     }
 
     // For Ref(Name)
-    fn visit_enum<A>(self, data: A) -> ::std::result::Result<Self::Value, A::Error>
+    fn visit_enum<A>(
+        self,
+        data: A,
+    ) -> ::std::result::Result<Self::Value, A::Error>
     where
         A: de::EnumAccess<'de>,
     {
@@ -335,7 +354,10 @@ impl<'de, T: Deserialize<'de> + Holder + WithVisitor> de::Visitor<'de> for Place
     }
 
     // Entry point for Record or Parameter::Typed
-    fn visit_map<A>(self, map: A) -> ::std::result::Result<Self::Value, A::Error>
+    fn visit_map<A>(
+        self,
+        map: A,
+    ) -> ::std::result::Result<Self::Value, A::Error>
     where
         A: de::MapAccess<'de>,
     {

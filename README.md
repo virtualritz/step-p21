@@ -58,13 +58,13 @@ divergence is recorded there rather than summarised loosely.
 
 | name | crates.io | docs.rs | master | description |
 |:-----|:----------|:--------|:-------|-------------|
-| espr |[![Crate](https://img.shields.io/crates/v/espr.svg)](https://crates.io/crates/espr) |[![docs.rs](https://docs.rs/espr/badge.svg)](https://docs.rs/espr) |[![cargo-doc](https://img.shields.io/badge/master-espr-blue)][espr-doc] |[EXPRESS Language (ISO 10303-11)][EXPRESS] Compiler|
-| espr-derive |[![Crate](https://img.shields.io/crates/v/espr-derive.svg)](https://crates.io/crates/espr-derive) |[![docs.rs](https://docs.rs/espr-derive/badge.svg)](https://docs.rs/espr-derive) |[![cargo-doc](https://img.shields.io/badge/master-espr_derive-blue)][espr-derive-doc] |proc-macro for running espr compiler|
+| step-p11 |[![Crate](https://img.shields.io/crates/v/step-p11.svg)](https://crates.io/crates/step-p11) |[![docs.rs](https://docs.rs/step-p11/badge.svg)](https://docs.rs/step-p11) |[![cargo-doc](https://img.shields.io/badge/master-step-p11-blue)][step-p11-doc] |[EXPRESS Language (ISO 10303-11)][EXPRESS] Compiler|
+| step-p11-derive |[![Crate](https://img.shields.io/crates/v/step-p11-derive.svg)](https://crates.io/crates/step-p11-derive) |[![docs.rs](https://docs.rs/step-p11-derive/badge.svg)](https://docs.rs/step-p11-derive) |[![cargo-doc](https://img.shields.io/badge/master-step_p11_derive-blue)][step-p11-derive-doc] |proc-macro for running step-p11 compiler|
 | step-p21 | [![Crate](https://img.shields.io/crates/v/step-p21.svg)](https://crates.io/crates/step-p21) | [![docs.rs](https://docs.rs/step-p21/badge.svg)](https://docs.rs/step-p21) |[![cargo-doc](https://img.shields.io/badge/master-step-p21-blue)][step-p21-doc]|Serialize/Deserialize STEP files|
 | step-p21-derive | [![Crate](https://img.shields.io/crates/v/step-p21-derive.svg)](https://crates.io/crates/step-p21-derive) | [![docs.rs](https://docs.rs/step-p21-derive/badge.svg)](https://docs.rs/step-p21-derive) |[![cargo-doc](https://img.shields.io/badge/master-step-p21--derive-blue)][step-p21-derive-doc]|proc-macro helper crate|
 
-[espr-doc]: https://virtualritz.github.io/step-p21/espr/index.html
-[espr-derive-doc]: https://virtualritz.github.io/step-p21/espr_derive/index.html
+[step-p11-doc]: https://virtualritz.github.io/step-p21/step-p11/index.html
+[step-p11-derive-doc]: https://virtualritz.github.io/step-p21/step_p11_derive/index.html
 [step-p21-doc]: https://virtualritz.github.io/step-p21/step-p21/index.html
 [step-p21-derive-doc]: https://virtualritz.github.io/step-p21/step_p21_derive/index.html
 [EXPRESS]: https://www.iso.org/standard/38047.html
@@ -88,7 +88,7 @@ What is STEP?
 | Schema Language | [Protocol Buffers Version 3 Language Specification][pbspec]| EXPRESS Language (ISO 10303-11)                          |
 | Schema file     | `*.proto` file                                             | `*.exp` file                                             |
 | Data            | [Encoded Binary data][pbencoding]                          | "Exchange structure", `*.step` file (ASCII, ISO 10303-21)|
-| Compiler        | protoc                                                     | esprc                                                    |
+| Compiler        | protoc                                                     | expressc                                                    |
 
 [pbspec]: https://developers.google.com/protocol-buffers/docs/reference/proto3-spec
 [pbencoding]: https://developers.google.com/protocol-buffers/docs/encoding
@@ -127,7 +127,7 @@ Roadmap
 
 - Serialize Rust struct to STEP file (ASCII) https://github.com/ricosjp/step-p21/issues/13
 - Translate rules in EXPRESS schema into Rust code https://github.com/ricosjp/step-p21/issues/43
-- Stablize AST and IR representation of espr
+- Stablize AST and IR representation of step-p11
 
 ### Planned features
 

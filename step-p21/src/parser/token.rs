@@ -4,13 +4,14 @@ use crate::{
     ast::*,
     parser::{basic::*, combinator::*},
 };
-use nom::bytes::complete::tag;
-use nom::combinator::map;
 use nom::{
     Parser,
     branch::alt,
-    character::complete::{char, digit0, digit1, multispace0, none_of, satisfy},
-    combinator::opt,
+    bytes::complete::tag,
+    character::complete::{
+        char, digit0, digit1, multispace0, none_of, satisfy,
+    },
+    combinator::{map, opt},
     multi::{many0, many1},
 };
 
@@ -23,7 +24,8 @@ pub fn sign(input: &str) -> ParseResult<'_, char> {
 pub fn integer(input: &str) -> ParseResult<'_, i64> {
     tuple((opt(sign), multispace0, digit1))
         .map(|(sign, _space, numbers)| {
-            let num: i64 = numbers.parse().expect("Failed to parse into integer");
+            let num: i64 =
+                numbers.parse().expect("Failed to parse into integer");
             match sign {
                 Some('-') => -num,
                 _ => num,
@@ -36,7 +38,8 @@ pub fn integer(input: &str) -> ParseResult<'_, i64> {
 fn exponent(input: &str) -> ParseResult<'_, i64> {
     tuple((char('E'), multispace0, opt(sign), multispace0, digit1))
         .map(|(_e, _sp1, sign, _sp2, digit)| {
-            let num: i64 = digit.parse().expect("Failed to parse integer in exponent");
+            let num: i64 =
+                digit.parse().expect("Failed to parse integer in exponent");
             match sign {
                 Some('-') => -num,
                 _ => num,
@@ -45,7 +48,8 @@ fn exponent(input: &str) -> ParseResult<'_, i64> {
         .parse(input)
 }
 
-/// real = \[ [sign] \] [digit] { [digit] } `.` { [digit] } \[ `E` \[ [sign] \] [digit] { [digit] } \] .
+/// real = \[ [sign] \] [digit] { [digit] } `.` { [digit] } \[ `E` \[ [sign] \]
+/// [digit] { [digit] } \] .
 pub fn real(input: &str) -> ParseResult<'_, f64> {
     tuple((
         opt(sign),
@@ -56,9 +60,10 @@ pub fn real(input: &str) -> ParseResult<'_, f64> {
         opt(exponent),
     ))
     .map(|(sign, _space, integral, _point, fractional, exp)| {
-        let num: f64 = format!("{}.{}e{}", integral, fractional, exp.unwrap_or(0))
-            .parse()
-            .expect("Failed to parse Float");
+        let num: f64 =
+            format!("{}.{}e{}", integral, fractional, exp.unwrap_or(0))
+                .parse()
+                .expect("Failed to parse Float");
         match sign {
             Some('-') => -num,
             _ => num,
@@ -67,7 +72,9 @@ pub fn real(input: &str) -> ParseResult<'_, f64> {
     .parse(input)
 }
 
-/// string = `'` { [special] | [digit] | [space] | [lower] | [upper] | high_codepoint | [apostrophe] [apostrophe] | [reverse_solidus] [reverse_solidus] | control_directive } `'` .
+/// string = `'` { [special] | [digit] | [space] | [lower] | [upper] |
+/// high_codepoint | [apostrophe] [apostrophe] | [reverse_solidus]
+/// [reverse_solidus] | control_directive } `'` .
 pub fn string(input: &str) -> ParseResult<'_, String> {
     let escaped_char = map(tag("''"), |_| '\''); // Parse '' as a single '
     let normal_char = none_of("'"); // Parse any character except '
@@ -97,8 +104,11 @@ pub fn enumeration(input: &str) -> ParseResult<'_, String> {
 
 // Root error for u64 overflow
 //
-// FIXME Though it works, should we use `VerboseErrorKind::Context` for this usage?
-fn u64_overflow(input: &str) -> nom::Err<nom_language::error::VerboseError<&str>> {
+// FIXME Though it works, should we use `VerboseErrorKind::Context` for this
+// usage?
+fn u64_overflow(
+    input: &str,
+) -> nom::Err<nom_language::error::VerboseError<&str>> {
     nom::Err::Failure(nom_language::error::VerboseError {
         errors: vec![(
             input,
@@ -111,14 +121,15 @@ fn u64_overflow(input: &str) -> nom::Err<nom_language::error::VerboseError<&str>
 ///
 /// As discussed in ISO-10303-21 6.4.4.3 Entity instance names,
 ///
-/// > NOTE 2 Leading zeros in entity instance names are ignored so "#001" is the same identifier as "#1".
+/// > NOTE 2 Leading zeros in entity instance names are ignored so "#001" is the
+/// > same identifier as "#1".
 ///
 /// leading zeros are ignored, and convert into `u64` type.
 ///
 /// Error
 /// -------
-/// - FIXME: If the input cannot be represented by `u64`, i.e. larger than [std::u64::MAX]
-///
+/// - FIXME: If the input cannot be represented by `u64`, i.e. larger than
+///   [u64::MAX]
 pub fn entity_instance_name(input: &str) -> ParseResult<'_, u64> {
     let (input, name) = tuple((char('#'), digit1))
         .map(|(_sharp, name): (_, &str)| name.parse())
@@ -136,8 +147,8 @@ pub fn entity_instance_name(input: &str) -> ParseResult<'_, u64> {
 ///
 /// Error
 /// -------
-/// - FIXME: If the input cannot be represented by `u64`, i.e. larger than [std::u64::MAX]
-///
+/// - FIXME: If the input cannot be represented by `u64`, i.e. larger than
+///   [u64::MAX]
 pub fn value_instance_name(input: &str) -> ParseResult<'_, u64> {
     let (input, name) = tuple((char('@'), digit1))
         .map(|(_sharp, name): (_, &str)| name.parse())
@@ -172,7 +183,8 @@ pub fn lhs_occurrence_name(input: &str) -> ParseResult<'_, Name> {
     .parse(input)
 }
 
-/// rhs_occurrence_name = ( [entity_instance_name] | [value_instance_name] | [constant_entity_name] | [constant_value_name]) .
+/// rhs_occurrence_name = ( [entity_instance_name] | [value_instance_name] |
+/// [constant_entity_name] | [constant_value_name]) .
 pub fn rhs_occurrence_name(input: &str) -> ParseResult<'_, Name> {
     alt((
         entity_instance_name.map(Name::Entity),
@@ -226,7 +238,9 @@ pub fn tag_name(input: &str) -> ParseResult<'_, String> {
 
 /// signature_content = BASE64 .
 pub fn signature_content(input: &str) -> ParseResult<'_, String> {
-    let base_char = satisfy(|c| matches!(c, '0'..='9' | 'a'..='z' | 'A'..='Z' | '+' | '/' | '='));
+    let base_char = satisfy(
+        |c| matches!(c, '0'..='9' | 'a'..='z' | 'A'..='Z' | '+' | '/' | '='),
+    );
     many1(base_char)
         .map(|chars| chars.iter().collect())
         .parse(input)
@@ -277,28 +291,36 @@ mod tests {
 
     #[test]
     fn instance_name() {
-        let (res, s) = super::entity_instance_name("#18446744073709551615" /* u64::MAX */)
-            .finish()
-            .unwrap();
+        let (res, s) = super::entity_instance_name(
+            "#18446744073709551615", /* u64::MAX */
+        )
+        .finish()
+        .unwrap();
         assert_eq!(res, "");
-        assert_eq!(s, std::u64::MAX);
+        assert_eq!(s, u64::MAX);
 
-        let (res, s) = super::value_instance_name("@18446744073709551615" /* u64::MAX */)
-            .finish()
-            .unwrap();
+        let (res, s) = super::value_instance_name(
+            "@18446744073709551615", /* u64::MAX */
+        )
+        .finish()
+        .unwrap();
         assert_eq!(res, "");
-        assert_eq!(s, std::u64::MAX);
+        assert_eq!(s, u64::MAX);
 
         // u64 overflow
         assert!(
-            super::entity_instance_name("#18446744073709551616" /* u64::MAX + 1 */)
-                .finish()
-                .is_err()
+            super::entity_instance_name(
+                "#18446744073709551616" /* u64::MAX + 1 */
+            )
+            .finish()
+            .is_err()
         );
         assert!(
-            super::value_instance_name("@18446744073709551616" /* u64::MAX + 1 */)
-                .finish()
-                .is_err()
+            super::value_instance_name(
+                "@18446744073709551616" /* u64::MAX + 1 */
+            )
+            .finish()
+            .is_err()
         );
 
         // zeros should be ignored

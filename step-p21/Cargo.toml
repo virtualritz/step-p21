@@ -25,5 +25,5 @@ thiserror = { workspace = true }
 
 [dev-dependencies]
 anyhow = { workspace = true }
-espr-derive = { workspace = true }
+step-p11-derive = { workspace = true }
 maplit = { workspace = true }

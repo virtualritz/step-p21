@@ -1,8 +1,8 @@
 [workspace]
 resolver = "3"
 members = [
-  "espr",
-  "espr-derive",
+  "step-p11",
+  "step-p11-derive",
   "step-p21",
   "step-p21-derive",
 ]
@@ -43,11 +43,11 @@ maplit = "1"
 nom = "8"
 # nom 8 moved `VerboseError` and `convert_error` out of the core crate.
 nom-language = "0.1"
-# NOTE: `espr` pins nom 7 rather than taking this. It implements nom's
+# NOTE: `step-p11` pins nom 7 rather than taking this. It implements nom's
 # `Parser` trait BY HAND for its remark-capturing `Map`, and nom 8 replaced
 # `parse` with a `process` method generic over `OutputMode` -- a redesign of
-# that layer, not a version bump. espr is unpublished and used only by tests
-# and the `esprc` binary, so the two majors coexist without ever meeting in a
+# that layer, not a version bump. step-p11 is unpublished and used only by tests
+# and the `expressc` binary, so the two majors coexist without ever meeting in a
 # shared type.
 proc-macro-crate = "3"
 proc-macro-error2 = "2"
@@ -58,7 +58,10 @@ syn = { version = "3", features = ["full", "extra-traits"] }
 thiserror = "2"
 trybuild = "1"
 
-espr = { version = "0.5.0", path = "espr" }
-espr-derive = { version = "0.5.0", path = "espr-derive" }
+# Path-only, NO version key. These two are never published, and a dev-dependency
+# that carries a version is resolved from crates.io at publish time -- which would
+# make `step-p21` unpublishable. Cargo strips path-only dev-dependencies instead.
+step-p11 = { path = "step-p11" }
+step-p11-derive = { path = "step-p11-derive" }
 step-p21 = { version = "0.5.0", path = "step-p21" }
 step-p21-derive = { version = "0.5.0", path = "step-p21-derive" }

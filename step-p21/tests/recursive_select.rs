@@ -1,7 +1,7 @@
 use std::str::FromStr;
 use step_p21::tables::*;
 
-espr_derive::inline_express!(
+step_p11_derive::inline_express!(
     r#"	
     SCHEMA test_schema;
       ENTITY a;

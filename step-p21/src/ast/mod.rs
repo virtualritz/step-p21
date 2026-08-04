@@ -1,20 +1,22 @@
 //! Abstract syntax tree for exchange structure
 //!
-//! This module contains implementation of [serde::Serialize] and [serde::Deserialize]
-//! for AST structs.
+//! This module contains implementation of [serde::Serialize] and
+//! [serde::Deserialize] for AST structs.
 //!
 //! Deserialize
 //! ------------
 //!
 //! [Implementing a Deserializer](https://serde.rs/impl-deserializer.html) page of [serde manual](https://serde.rs/) says
 //! > The deserializer is responsible for mapping the input data
-//! > into [Serde's data model](https://serde.rs/data-model.html) by invoking exactly one of the methods
+//! > into [Serde's data model](https://serde.rs/data-model.html) by invoking
+//! > exactly one of the methods
 //! > on the Visitor that it receives.
 //!
 //! [serde::de::Deserializer] trait is implemented for [Parameter],
 //! [Record], and [SubSuperRecord].
-//! Be sure that this mapping is not only for espr-generated structs.
-//! This can be used with other Rust structs using `serde_derive::Deserialize` custom derive:
+//! Be sure that this mapping is not only for step_p11-generated structs.
+//! This can be used with other Rust structs using `serde_derive::Deserialize`
+//! custom derive:
 //!
 //! ```text
 //! ┌────────────────────┐
@@ -26,7 +28,7 @@
 //! └─┬────┬───────────┘
 //!   │    │ step_p21_derive::Deserialize
 //!   │ ┌──▼─────────────────────────┐
-//!   │ │ espr-generated Rust struct │
+//!   │ │ step_p11-generated Rust struct │
 //!   │ └────────────────────────────┘
 //!   │ serde_derive::Deserialize
 //! ┌─▼─────────────────┐
@@ -49,14 +51,18 @@ macro_rules! derive_ast_from_str {
     ($ast:ty, $parse:path) => {
         impl std::str::FromStr for $ast {
             type Err = $crate::error::Error;
+
             fn from_str(input: &str) -> $crate::error::Result<Self> {
                 use nom::Finish;
                 let input = input.trim();
-                let (residual, record) = AST::parse(input)
-                    .finish()
-                    .map_err(|err| $crate::error::TokenizeFailed::new(input, err))?;
+                let (residual, record) =
+                    AST::parse(input).finish().map_err(|err| {
+                        $crate::error::TokenizeFailed::new(input, err)
+                    })?;
                 if !residual.is_empty() {
-                    return Err($crate::error::Error::ExtraInputRemaining(input.to_string()));
+                    return Err($crate::error::Error::ExtraInputRemaining(
+                        input.to_string(),
+                    ));
                 }
                 Ok(record)
             }
@@ -72,14 +78,16 @@ macro_rules! derive_ast_from_str {
 
 /// Name of an entity instance or a value
 ///
-/// Corresponding to [parser::token::rhs_occurrence_name] and [parser::token::lhs_occurrence_name]
+/// Corresponding to [parser::token::rhs_occurrence_name] and
+/// [parser::token::lhs_occurrence_name]
 #[derive(Debug, Clone, PartialEq)]
 pub enum Name {
     /// Like `#11`, corresponds to [parser::token::entity_instance_name]
     Entity(u64),
     /// Like `@11`, corresponds to [parser::token::value_instance_name]
     Value(u64),
-    /// Like `#CONST_ENTITY`, corresponds to [parser::token::constant_entity_name]
+    /// Like `#CONST_ENTITY`, corresponds to
+    /// [parser::token::constant_entity_name]
     ConstantEntity(String),
     /// Like `@CONST_VALUE`, corresponds to [parser::token::constant_value_name]
     ConstantValue(String),
@@ -92,15 +100,16 @@ derive_ast_from_str!(Name, parser::token::rhs_occurrence_name);
 /// --------
 ///
 /// ```
-/// use step_p21::ast::{Record, Parameter};
 /// use std::str::FromStr;
+/// use step_p21::ast::{Parameter, Record};
 ///
 /// let record = Record::from_str("A(1, 2)").unwrap();
 /// assert_eq!(
 ///     record,
 ///     Record {
 ///         name: "A".to_string(),
-///         parameter: vec![Parameter::Integer(1), Parameter::Integer(2)].into(),
+///         parameter: vec![Parameter::Integer(1), Parameter::Integer(2)]
+///             .into(),
 ///     }
 /// )
 /// ```
@@ -113,9 +122,9 @@ derive_ast_from_str!(Name, parser::token::rhs_occurrence_name);
 /// The keyword is mapped into the key and the parameters are its value:
 ///
 /// ```
-/// use std::{str::FromStr, collections::HashMap};
-/// use step_p21::ast::*;
 /// use serde::Deserialize;
+/// use std::{collections::HashMap, str::FromStr};
+/// use step_p21::ast::*;
 ///
 /// let p = Record::from_str("DATA_KEYWORD(1, 2)").unwrap();
 ///
@@ -133,10 +142,7 @@ derive_ast_from_str!(Name, parser::token::rhs_occurrence_name);
 ///     #[serde(rename = "DATA_KEYWORD")]
 ///     a: Vec<i32>,
 /// }
-/// assert_eq!(
-///     X::deserialize(&p).unwrap(),
-///     X { a: vec![1, 2] }
-/// );
+/// assert_eq!(X::deserialize(&p).unwrap(), X { a: vec![1, 2] });
 /// ```
 ///
 /// Mapping to simple instance
@@ -144,14 +150,14 @@ derive_ast_from_str!(Name, parser::token::rhs_occurrence_name);
 ///
 /// It is deserialized as a "struct" only when the hint function
 /// [serde::Deserializer::deserialize_struct] is called
-/// and the struct name matches to its keyword appears in the exchange structure.
-/// See [the manual of container attribute in serde](https://serde.rs/container-attrs.html)
+/// and the struct name matches to its keyword appears in the exchange
+/// structure. See [the manual of container attribute in serde](https://serde.rs/container-attrs.html)
 /// for detail.
 ///
 /// ```
-/// use std::{str::FromStr, collections::HashMap};
-/// use step_p21::ast::*;
 /// use serde::Deserialize;
+/// use std::{collections::HashMap, str::FromStr};
+/// use step_p21::ast::*;
 ///
 /// let p = Record::from_str("DATA_KEYWORD(1, 2)").unwrap();
 ///
@@ -161,10 +167,7 @@ derive_ast_from_str!(Name, parser::token::rhs_occurrence_name);
 ///     x: i32,
 ///     y: i32,
 /// }
-/// assert_eq!(
-///     A::deserialize(&p).unwrap(),
-///     A { x: 1, y: 2 }
-/// );
+/// assert_eq!(A::deserialize(&p).unwrap(), A { x: 1, y: 2 });
 ///
 /// #[derive(Debug, Clone, PartialEq, Deserialize)]
 /// #[serde(rename = "ANOTHER_KEYWORD")] // keyword does not match
@@ -195,8 +198,8 @@ derive_ast_from_str!(Name, parser::token::rhs_occurrence_name);
 /// END_ENTITY;
 /// ```
 ///
-/// In this EXPRESS schema, a complex entity of `person` can have three components
-/// representing `person`, `employee`, and `student`.
+/// In this EXPRESS schema, a complex entity of `person` can have three
+/// components representing `person`, `employee`, and `student`.
 /// There are two way of mapping it from an exchange structure.
 /// The internal mapping looks like usual case:
 ///
@@ -227,7 +230,6 @@ derive_ast_from_str!(Name, parser::token::rhs_occurrence_name);
 /// when using internal mapping rule.
 /// Structs using internal mapping should implement [serde::Deserialize]
 /// as described in subtype-supertype constraint in EXPRESS schema.
-///
 #[derive(Debug, Clone, PartialEq)]
 pub struct Record {
     pub name: String,
@@ -242,8 +244,8 @@ derive_ast_from_str!(Record, parser::exchange::simple_record);
 /// --------
 ///
 /// ```
-/// use step_p21::ast::*;
 /// use std::str::FromStr;
+/// use step_p21::ast::*;
 ///
 /// let record = SubSuperRecord::from_str("(A(1, 2) B(3, 4))").unwrap();
 /// assert_eq!(
@@ -251,17 +253,13 @@ derive_ast_from_str!(Record, parser::exchange::simple_record);
 ///     SubSuperRecord(vec![
 ///         Record {
 ///             name: "A".to_string(),
-///             parameter: vec![
-///                 Parameter::Integer(1),
-///                 Parameter::Integer(2)
-///             ].into(),
+///             parameter: vec![Parameter::Integer(1), Parameter::Integer(2)]
+///                 .into(),
 ///         },
 ///         Record {
 ///             name: "B".to_string(),
-///             parameter: vec![
-///                 Parameter::Integer(3),
-///                 Parameter::Integer(4)
-///             ].into(),
+///             parameter: vec![Parameter::Integer(3), Parameter::Integer(4)]
+///                 .into(),
 ///         }
 ///     ])
 /// )
@@ -273,9 +271,9 @@ derive_ast_from_str!(Record, parser::exchange::simple_record);
 /// Similar to [Record], [SubSuperRecord] can be deserialized as a "map":
 ///
 /// ```
-/// use std::{str::FromStr, collections::HashMap};
-/// use step_p21::ast::*;
 /// use serde::Deserialize;
+/// use std::{collections::HashMap, str::FromStr};
+/// use step_p21::ast::*;
 ///
 /// let p = SubSuperRecord::from_str("(A(1, 2) B(3, 4))").unwrap();
 ///
@@ -349,22 +347,23 @@ derive_ast_from_str!(Record, parser::exchange::simple_record);
 ///
 /// [SubSuperRecord] is not self-describing because
 /// EXPRESS does not defines memory layout of complex entities.
-///
 #[derive(Debug, Clone, PartialEq)]
 pub struct SubSuperRecord(pub Vec<Record>);
 derive_ast_from_str!(SubSuperRecord, parser::exchange::subsuper_record);
 
 impl IntoIterator for SubSuperRecord {
-    type Item = Record;
     type IntoIter = std::vec::IntoIter<Self::Item>;
+    type Item = Record;
+
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
     }
 }
 
 impl<'a> IntoIterator for &'a SubSuperRecord {
-    type Item = &'a Record;
     type IntoIter = std::slice::Iter<'a, Record>;
+    type Item = &'a Record;
+
     fn into_iter(self) -> Self::IntoIter {
         self.0.iter()
     }
@@ -385,8 +384,8 @@ impl<'a> FromIterator<&'a Record> for SubSuperRecord {
 /// `DATA` section in STEP file
 ///
 /// ```
-/// use step_p21::ast::DataSection;
 /// use std::str::FromStr;
+/// use step_p21::ast::DataSection;
 ///
 /// let input = r#"
 /// DATA;
@@ -413,7 +412,10 @@ derive_ast_from_str!(DataSection, parser::exchange::data_section);
 ///
 /// ```
 /// use nom::Finish;
-/// use step_p21::{parser::exchange, ast::{Parameter, Record}};
+/// use step_p21::{
+///     ast::{Parameter, Record},
+///     parser::exchange,
+/// };
 ///
 /// let (residual, p) = exchange::parameter("B((1.0, A((2.0, 3.0))))")
 ///     .finish()
@@ -423,7 +425,9 @@ derive_ast_from_str!(DataSection, parser::exchange::data_section);
 /// // A((2.0, 3.0))
 /// let a = Parameter::Typed {
 ///     keyword: "A".to_string(),
-///     parameter: Box::new(vec![Parameter::real(2.0), Parameter::real(3.0)].into()),
+///     parameter: Box::new(
+///         vec![Parameter::real(2.0), Parameter::real(3.0)].into(),
+///     ),
 /// };
 ///
 /// // B((1.0, a))
@@ -437,7 +441,8 @@ derive_ast_from_str!(DataSection, parser::exchange::data_section);
 ///
 /// FromIterator
 /// -------------
-/// Create a list as `Parameter::List` from `Iterator<Item=Parameter>` or `Iterator<Item=&Parameter>`.
+/// Create a list as `Parameter::List` from `Iterator<Item=Parameter>` or
+/// `Iterator<Item=&Parameter>`.
 ///
 /// ```
 /// use step_p21::ast::Parameter;
@@ -462,7 +467,6 @@ derive_ast_from_str!(DataSection, parser::exchange::data_section);
 /// | Enumeration | unit_variant (through [serde::de::value::StringDeserializer])|
 /// | Typed       | map (through [de::RecordDeserializer])|
 /// | Ref         | newtype_variant  |
-///
 #[derive(Debug, Clone, PartialEq, derive_more::From)]
 pub enum Parameter {
     /// Corresponding to `TYPED_PARAMETER` in WSN:
@@ -492,9 +496,9 @@ pub enum Parameter {
     /// Deserialize
     /// ------------
     /// ```
-    /// use std::{str::FromStr, collections::HashMap};
-    /// use step_p21::ast::*;
     /// use serde::Deserialize;
+    /// use std::{collections::HashMap, str::FromStr};
+    /// use step_p21::ast::*;
     ///
     /// // Regarded as a map `{ "A": [1, 2] }` in serde data model
     /// let p = Parameter::from_str("A((1, 2))").unwrap();
@@ -519,9 +523,9 @@ pub enum Parameter {
     /// Different from [Record], deserializing into a struct is not supported:
     ///
     /// ```
-    /// use std::{str::FromStr, collections::HashMap};
-    /// use step_p21::ast::*;
     /// use serde::Deserialize;
+    /// use std::{collections::HashMap, str::FromStr};
+    /// use step_p21::ast::*;
     ///
     /// let p = Parameter::from_str("A(1)").unwrap();
     ///
@@ -531,7 +535,6 @@ pub enum Parameter {
     /// }
     /// assert!(A::deserialize(&p).is_err());
     /// ```
-    ///
     Typed {
         keyword: String,
         parameter: Box<Parameter>,
@@ -555,8 +558,8 @@ pub enum Parameter {
     /// Deserialize
     /// ------------
     /// ```
-    /// use step_p21::ast::*;
     /// use serde::Deserialize;
+    /// use step_p21::ast::*;
     ///
     /// let p = Parameter::Integer(2);
     /// let a = i64::deserialize(&p).unwrap();
@@ -617,20 +620,19 @@ pub enum Parameter {
     /// Deserialize
     /// ------------
     /// ```
-    /// use step_p21::ast::*;
     /// use serde::Deserialize;
     /// use std::str::FromStr;
+    /// use step_p21::ast::*;
     ///
     /// let p = Parameter::from_str(".A.").unwrap();
     ///
     /// #[derive(Debug, PartialEq, Deserialize)]
     /// enum E {
-    ///   A,
-    ///   B
+    ///     A,
+    ///     B,
     /// }
     /// assert_eq!(E::deserialize(&p).unwrap(), E::A);
     /// ```
-    ///
     Enumeration(String),
 
     /// List of parameters. This can be non-uniform.
@@ -642,19 +644,22 @@ pub enum Parameter {
     /// use step_p21::ast::Parameter;
     ///
     /// let p = Parameter::from_str("(1.0, 2, 'STRING')").unwrap();
-    /// assert_eq!(p, Parameter::List(vec![
-    ///   Parameter::Real(1.0),
-    ///   Parameter::Integer(2),
-    ///   Parameter::String("STRING".to_string()),
-    /// ]));
+    /// assert_eq!(
+    ///     p,
+    ///     Parameter::List(vec![
+    ///         Parameter::Real(1.0),
+    ///         Parameter::Integer(2),
+    ///         Parameter::String("STRING".to_string()),
+    ///     ])
+    /// );
     /// ```
     ///
     /// Deserialize
     /// ------------
     /// ```
+    /// use serde::Deserialize;
     /// use std::str::FromStr;
     /// use step_p21::ast::*;
-    /// use serde::Deserialize;
     ///
     /// let p = Parameter::from_str("(1, 2, 3)").unwrap();
     ///
@@ -680,18 +685,18 @@ pub enum Parameter {
     /// Deserialize
     /// ------------
     /// ```
-    /// use step_p21::ast::*;
     /// use serde::Deserialize;
     /// use std::str::FromStr;
+    /// use step_p21::ast::*;
     ///
     /// let p = Parameter::from_str("#12").unwrap();
     ///
     /// #[derive(Debug, PartialEq, Deserialize)]
     /// enum Id {
-    ///   #[serde(rename = "Entity")] // "Entity" is keyword for entity reference
-    ///   E(usize),
-    ///   #[serde(rename = "Value")]  // "Value" is keyword for value reference
-    ///   V(usize),
+    ///     #[serde(rename = "Entity")] // "Entity" is keyword for entity reference
+    ///     E(usize),
+    ///     #[serde(rename = "Value")] // "Value" is keyword for value reference
+    ///     V(usize),
     /// }
     /// assert_eq!(Id::deserialize(&p).unwrap(), Id::E(12));
     /// ```
@@ -704,8 +709,8 @@ pub enum Parameter {
     /// Deserialize
     /// -----------
     /// ```
-    /// use step_p21::ast::*;
     /// use serde::Deserialize;
+    /// use step_p21::ast::*;
     ///
     /// let p = Parameter::NotProvided;
     /// assert_eq!(Option::<i64>::deserialize(&p).unwrap(), None);
@@ -717,8 +722,8 @@ pub enum Parameter {
     /// Deserialize
     /// ------------
     /// ```
-    /// use step_p21::ast::*;
     /// use serde::Deserialize;
+    /// use step_p21::ast::*;
     ///
     /// let p = Parameter::Omitted;
     /// assert_eq!(Option::<i64>::deserialize(&p).unwrap(), None);
@@ -802,7 +807,8 @@ pub enum AnchorItem {
     Real(f64),
     String(String),
     Enumeration(String),
-    /// The special token dollar sign (`$`) is used to represent an object whose value is not provided in the exchange structure.
+    /// The special token dollar sign (`$`) is used to represent an object whose
+    /// value is not provided in the exchange structure.
     NotProvided,
     /// A reference to entity or value
     Name(Name),

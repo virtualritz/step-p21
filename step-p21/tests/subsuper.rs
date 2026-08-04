@@ -3,7 +3,7 @@ use serde::Deserialize;
 use std::str::FromStr;
 use step_p21::{ast::*, parser::exchange, tables::*};
 
-espr_derive::inline_express!(
+step_p11_derive::inline_express!(
     r#"
     SCHEMA test_schema;
       ENTITY base SUPERTYPE OF (ONEOF (sub));
@@ -27,7 +27,8 @@ use test_schema::*;
 
 #[test]
 fn deserialize_base() {
-    let (residual, p): (_, Record) = exchange::simple_record("BASE(1.0)").finish().unwrap();
+    let (residual, p): (_, Record) =
+        exchange::simple_record("BASE(1.0)").finish().unwrap();
     dbg!(&p);
     assert_eq!(residual, "");
     let a: BaseHolder = Deserialize::deserialize(&p).unwrap();
@@ -52,7 +53,8 @@ fn deserialize_sub() {
         },
     );
     fn test(input: &str, answer: SubHolder) {
-        let (residual, p): (_, Record) = exchange::simple_record(input).finish().unwrap();
+        let (residual, p): (_, Record) =
+            exchange::simple_record(input).finish().unwrap();
         dbg!(&p);
         assert_eq!(residual, "");
         let a: SubHolder = Deserialize::deserialize(&p).unwrap();
@@ -75,7 +77,8 @@ fn deserialize_subsub() {
         },
     );
     fn test(input: &str, answer: SubsubHolder) {
-        let (residual, p): (_, Record) = exchange::simple_record(input).finish().unwrap();
+        let (residual, p): (_, Record) =
+            exchange::simple_record(input).finish().unwrap();
         dbg!(&p);
         assert_eq!(residual, "");
         let a: SubsubHolder = Deserialize::deserialize(&p).unwrap();

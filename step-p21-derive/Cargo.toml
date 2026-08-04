@@ -24,8 +24,12 @@ quote = { workspace = true }
 syn = { workspace = true }
 
 [dev-dependencies]
-espr = { workspace = true }
+step-p11 = { workspace = true }
 insta = { workspace = true }
 serde = { workspace = true }
-step-p21 = { workspace = true }
+# Path-only, NO version: `step-p21` depends on THIS crate, so a versioned
+# dev-dependency back on it is a publish cycle -- cargo would demand a
+# published `step-p21` before `step-p21-derive` could go up, and vice versa.
+# Cargo strips path-only dev-dependencies, which breaks the cycle.
+step-p21 = { path = "../step-p21" }
 trybuild = { workspace = true }

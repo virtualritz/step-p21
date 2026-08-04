@@ -56,17 +56,16 @@ use std::ops::*;
 /// assert_eq!(Logical::Unknown ^ Logical::Unknown, Logical::Unknown);
 /// assert_eq!(Logical::Unknown ^ Logical::False, Logical::Unknown);
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Default,
+)]
 pub enum Logical {
     False,
+    /// Three-valued logic's third value, and the default: an unset `LOGICAL`
+    /// carries no information, which is not the same as being false.
+    #[default]
     Unknown,
     True,
-}
-
-impl Default for Logical {
-    fn default() -> Logical {
-        Logical::Unknown
-    }
 }
 
 impl std::fmt::Display for Logical {
@@ -108,6 +107,7 @@ impl From<Logical> for Option<bool> {
 
 impl BitAnd for Logical {
     type Output = Self;
+
     fn bitand(self, other: Self) -> Self {
         match (self, other) {
             (Logical::False, _) => Logical::False,
@@ -121,6 +121,7 @@ impl BitAnd for Logical {
 
 impl BitOr for Logical {
     type Output = Self;
+
     fn bitor(self, other: Self) -> Self {
         match (self, other) {
             (Logical::True, _) => Logical::True,
@@ -134,6 +135,7 @@ impl BitOr for Logical {
 
 impl BitXor for Logical {
     type Output = Logical;
+
     fn bitxor(self, other: Self) -> Logical {
         match (self, other) {
             (Logical::Unknown, _) => Logical::Unknown,
@@ -145,6 +147,7 @@ impl BitXor for Logical {
 
 impl Not for Logical {
     type Output = Logical;
+
     fn not(self) -> Logical {
         match self {
             Logical::True => Logical::False,
@@ -169,9 +172,14 @@ const VARIANTS: &[&str] = &["T", "True", "F", "False", "U", "Unknown"];
 
 impl<'de> serde::de::Visitor<'de> for SubVisitor {
     type Value = SubLogical;
-    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+
+    fn expecting(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+    ) -> std::fmt::Result {
         write!(formatter, "Logical")
     }
+
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
     where
         E: serde::de::Error,
@@ -186,6 +194,7 @@ impl<'de> serde::de::Visitor<'de> for SubVisitor {
             _ => Err(E::unknown_field(v, VARIANTS)),
         }
     }
+
     fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
     where
         E: serde::de::Error,
@@ -229,9 +238,14 @@ struct Visitor;
 
 impl<'de> serde::de::Visitor<'de> for Visitor {
     type Value = Logical;
-    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+
+    fn expecting(
+        &self,
+        formatter: &mut std::fmt::Formatter,
+    ) -> std::fmt::Result {
         write!(formatter, "enum Logical")
     }
+
     fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>
     where
         A: serde::de::EnumAccess<'de>,

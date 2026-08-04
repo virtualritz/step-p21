@@ -38,12 +38,14 @@ END-ISO-10303-21;
 /// `''` collapses to one apostrophe, and the string does not end early.
 #[test]
 fn doubled_apostrophe_is_one_apostrophe() {
-    let (residual, parsed) = exchange::parameter("'1/2'' NPT coupling'").unwrap();
+    let (residual, parsed) =
+        exchange::parameter("'1/2'' NPT coupling'").unwrap();
     assert_eq!(residual, "", "the whole literal must be consumed");
     assert_eq!(parsed, Parameter::String("1/2' NPT coupling".to_string()));
 }
 
-/// An empty aggregate is an empty list, not a parse error and not `NotProvided`.
+/// An empty aggregate is an empty list, not a parse error and not
+/// `NotProvided`.
 #[test]
 fn empty_aggregate_is_an_empty_list() {
     let (residual, parsed) = exchange::parameter("()").unwrap();
@@ -61,7 +63,8 @@ fn empty_aggregate_is_an_empty_list() {
 /// whole survives, which is what a caller sees.
 #[test]
 fn a_file_using_both_parses_whole() {
-    let exchange = parse(STEP).expect("a file with an escaped string and an empty aggregate");
+    let exchange = parse(STEP)
+        .expect("a file with an escaped string and an empty aggregate");
 
     // The header kept the inch mark as a single apostrophe.
     let file_name = exchange

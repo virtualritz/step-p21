@@ -1,0 +1,14 @@
+format_code_in_doc_comments = true
+imports_granularity = "Crate"
+max_width = 80
+reorder_impl_items = true
+unstable_features = true
+use_field_init_shorthand = true
+wrap_comments = true
+
+# `src/generated/*` is emitted by `cargo xtask gen-all`; the generator owns its
+# layout and the drift guard byte-compares that output. Formatting it here would
+# couple the guard to the rustfmt version (nightly, floating) and cause
+# false-positive drift. See
+# docs/superpowers/specs/2026-05-31-syn-codegen-drift-guard-design.md.
+ignore = ["src/generated"]

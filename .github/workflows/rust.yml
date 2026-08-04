@@ -20,7 +20,7 @@ jobs:
       with:
         profile: minimal
         toolchain: ${{ matrix.rust }}
-        components: rustfmt  # espr uses rustfmt in tests
+        components: rustfmt  # step-p11 uses rustfmt in tests
         default: true
         override: true
     - uses: Swatinem/rust-cache@v1
