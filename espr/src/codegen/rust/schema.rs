@@ -15,7 +15,7 @@ impl CratePrefix {
     pub fn as_path(&self) -> syn::Path {
         match self {
             CratePrefix::Internal => syn::parse_str("crate").unwrap(),
-            CratePrefix::External => syn::parse_str("::ruststep").unwrap(),
+            CratePrefix::External => syn::parse_str("::step_p21").unwrap(),
         }
     }
 }
@@ -64,11 +64,11 @@ impl Schema {
             .chain(type_decls.map(|e| format_ident!("{}_holders", e.id())))
             .collect();
 
-        let ruststep_path = prefix.as_path();
+        let step_p21_path = prefix.as_path();
 
         quote! {
             pub mod #name {
-                use #ruststep_path::{as_holder, Holder, TableInit, primitive::*, derive_more::*};
+                use #step_p21_path::{as_holder, Holder, TableInit, primitive::*, derive_more::*};
                 use std::collections::HashMap;
 
                 #[derive(Debug, Clone, PartialEq, Default, TableInit)]

@@ -3,6 +3,6 @@ resolver = "2"
 members = [
   "espr",
   "espr-derive",
-  "ruststep",
-  "ruststep-derive",
+  "step-p21",
+  "step-p21-derive",
 ]

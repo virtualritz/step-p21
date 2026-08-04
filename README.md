@@ -1,6 +1,38 @@
 **This project is still in experimental stage. DO NOT USE FOR PRODUCT.**
 
-ruststep
+> ## Fork notice
+>
+> `step-p21` is a fork of [`ricosjp/ruststep`](https://github.com/ricosjp/ruststep)
+> (Apache-2.0), created because the two crates it publishes had gone stale on
+> crates.io: `ruststep-v0.4.0` was tagged **2024-09-20** and the last upstream
+> commit is **2025-03-20**, leaving five unreleased commits stranded on `master`.
+>
+> Two of those five fix ISO 10303-21 syntax that real CAD exports rely on, and
+> without a release they cannot reach downstream users -- a `[patch.crates-io]`
+> entry fixes your own build but never your dependents:
+>
+> * `4197eee` -- `''` inside a string is Part 21's escape for a literal
+>   apostrophe, which imperial CAD emits as an inch mark in thread callouts.
+> * `90fdc93` -- `()` is a legal empty aggregate, e.g.
+>   `ADVANCED_FACE('',(),#57075,.T.)`.
+>
+> ### Changes from upstream
+>
+> * `ruststep` -> `step-p21` and `ruststep-derive` -> `step-p21-derive`. The name
+>   states the scope: ISO 10303-**21**, the clear-text encoding of the exchange
+>   structure. The *vocabulary* (Part 42 geometry, the APs) is a consumer's
+>   concern, not this crate's.
+> * `step-p21-derive` resolves its runtime path via `crate_name("step-p21")`.
+> * Added `step-p21/tests/unreleased_syntax_fixes.rs`, pinning both fixes through
+>   the public `parse` and `exchange::parameter` entry points. Upstream tested
+>   each sub-parser; a published crate owes the contract its callers use.
+> * `espr` and `espr-derive` are retained unrenamed and unpublished. They are the
+>   EXPRESS (Part 11) compiler, kept because this workspace's own tests use
+>   `espr_derive::inline_express!` to exercise the `Holder`/table machinery.
+>
+> Upstream fixes are welcome back; nothing here is intended as a hostile fork.
+
+step-p21
 =========
 
 Crates for STEP (Standard for the Exchange of Product model data) written in pure Rust
@@ -10,13 +42,13 @@ aimed at replacing [stepcode](https://github.com/stepcode/stepcode).
 |:-----|:----------|:--------|:-------|-------------|
 | espr |[![Crate](https://img.shields.io/crates/v/espr.svg)](https://crates.io/crates/espr) |[![docs.rs](https://docs.rs/espr/badge.svg)](https://docs.rs/espr) |[![cargo-doc](https://img.shields.io/badge/master-espr-blue)][espr-doc] |[EXPRESS Language (ISO 10303-11)][EXPRESS] Compiler|
 | espr-derive |[![Crate](https://img.shields.io/crates/v/espr-derive.svg)](https://crates.io/crates/espr-derive) |[![docs.rs](https://docs.rs/espr-derive/badge.svg)](https://docs.rs/espr-derive) |[![cargo-doc](https://img.shields.io/badge/master-espr_derive-blue)][espr-derive-doc] |proc-macro for running espr compiler|
-| ruststep | [![Crate](https://img.shields.io/crates/v/ruststep.svg)](https://crates.io/crates/ruststep) | [![docs.rs](https://docs.rs/ruststep/badge.svg)](https://docs.rs/ruststep) |[![cargo-doc](https://img.shields.io/badge/master-ruststep-blue)][ruststep-doc]|Serialize/Deserialize STEP files|
-| ruststep-derive | [![Crate](https://img.shields.io/crates/v/ruststep-derive.svg)](https://crates.io/crates/ruststep-derive) | [![docs.rs](https://docs.rs/ruststep-derive/badge.svg)](https://docs.rs/ruststep-derive) |[![cargo-doc](https://img.shields.io/badge/master-ruststep--derive-blue)][ruststep-derive-doc]|proc-macro helper crate|
+| step-p21 | [![Crate](https://img.shields.io/crates/v/step-p21.svg)](https://crates.io/crates/step-p21) | [![docs.rs](https://docs.rs/step-p21/badge.svg)](https://docs.rs/step-p21) |[![cargo-doc](https://img.shields.io/badge/master-step-p21-blue)][step-p21-doc]|Serialize/Deserialize STEP files|
+| step-p21-derive | [![Crate](https://img.shields.io/crates/v/step-p21-derive.svg)](https://crates.io/crates/step-p21-derive) | [![docs.rs](https://docs.rs/step-p21-derive/badge.svg)](https://docs.rs/step-p21-derive) |[![cargo-doc](https://img.shields.io/badge/master-step-p21--derive-blue)][step-p21-derive-doc]|proc-macro helper crate|
 
-[espr-doc]: https://ricosjp.github.io/ruststep/espr/index.html
-[espr-derive-doc]: https://ricosjp.github.io/ruststep/espr_derive/index.html
-[ruststep-doc]: https://ricosjp.github.io/ruststep/ruststep/index.html
-[ruststep-derive-doc]: https://ricosjp.github.io/ruststep/ruststep_derive/index.html
+[espr-doc]: https://virtualritz.github.io/step-p21/espr/index.html
+[espr-derive-doc]: https://virtualritz.github.io/step-p21/espr_derive/index.html
+[step-p21-doc]: https://virtualritz.github.io/step-p21/step-p21/index.html
+[step-p21-derive-doc]: https://virtualritz.github.io/step-p21/step_p21_derive/index.html
 [EXPRESS]: https://www.iso.org/standard/38047.html
 
 What is STEP?
@@ -43,7 +75,7 @@ What is STEP?
 [pbspec]: https://developers.google.com/protocol-buffers/docs/reference/proto3-spec
 [pbencoding]: https://developers.google.com/protocol-buffers/docs/encoding
 
-Why ruststep?
+Why step-p21?
 --------------
 
 - STEP is not only for CAD
@@ -75,8 +107,8 @@ Roadmap
 
 ### TODO until 1.0 release
 
-- Serialize Rust struct to STEP file (ASCII) https://github.com/ricosjp/ruststep/issues/13
-- Translate rules in EXPRESS schema into Rust code https://github.com/ricosjp/ruststep/issues/43
+- Serialize Rust struct to STEP file (ASCII) https://github.com/ricosjp/step-p21/issues/13
+- Translate rules in EXPRESS schema into Rust code https://github.com/ricosjp/step-p21/issues/43
 - Stablize AST and IR representation of espr
 
 ### Planned features
@@ -106,13 +138,13 @@ The following directories are included for development purpose.
 **They are not parts of this project**.
 
 - [schemas](./schemas)
-- [ruststep/tests/steps](./ruststep/tests/steps)
+- [step-p21/tests/steps](./step-p21/tests/steps)
 
 Contributor License Agreement (CLA)
 ----------------------------------
 
 When you contribute (code, documentation, or anything else),
-you have to be aware that your contribution is covered by the same Apache 2.0 License that is applied to ruststep itself.
+you have to be aware that your contribution is covered by the same Apache 2.0 License that is applied to step-p21 itself.
 This applies to all contributors, including those contributing on behalf of a company.
 If you agree to its content, you simply have to click on the link posted by the [CLA assistant bot](https://github.com/CLAassistant) as a comment to the pull request.
 Click it to check the CLA, then accept it on the following screen if you agree to it.

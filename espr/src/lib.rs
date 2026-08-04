@@ -21,7 +21,7 @@
 //! └──┬────────────────────────┘
 //!    │ proc-macro
 //! ┌──▼──────────────┐ call ┌──────────┐
-//! │ Final Rust code ├──────► ruststep │
+//! │ Final Rust code ├──────► step_p21 │
 //! └─────────────────┘      └──────────┘
 //! ```
 //!
@@ -38,7 +38,7 @@
 //! Introduction to STEP
 //! ---------------------
 //!
-//! As we describe in [README](https://github.com/ricosjp/ruststep#readme),
+//! As we describe in [README](https://github.com/ricosjp/step_p21#readme),
 //! STEP consists of three components:
 //!
 //! - Schema language called EXPRESS

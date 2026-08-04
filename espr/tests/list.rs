@@ -28,8 +28,8 @@ fn list() {
 
     insta::assert_snapshot!(tt, @r###"
     pub mod test_schema {
-        use ruststep::{as_holder, derive_more::*, primitive::*, Holder, TableInit};
         use std::collections::HashMap;
+        use step_p21::{as_holder, derive_more::*, primitive::*, Holder, TableInit};
         #[derive(Debug, Clone, PartialEq, Default, TableInit)]
         pub struct Tables {
             a: HashMap<u64, as_holder!(A)>,
@@ -52,14 +52,14 @@ fn list() {
             }
         }
         #[derive(
-            Clone, Debug, PartialEq, AsRef, Deref, DerefMut, Into, From, :: ruststep_derive :: Holder,
+            Clone, Debug, PartialEq, AsRef, Deref, DerefMut, Into, From, :: step_p21_derive :: Holder,
         )]
         # [holder (table = Tables)]
         # [holder (field = c)]
         #[holder(generate_deserialize)]
         pub struct C(#[holder(use_place_holder)] pub Vec<f64>);
         #[derive(
-            Clone, Debug, PartialEq, AsRef, Deref, DerefMut, Into, From, :: ruststep_derive :: Holder,
+            Clone, Debug, PartialEq, AsRef, Deref, DerefMut, Into, From, :: step_p21_derive :: Holder,
         )]
         # [holder (table = Tables)]
         # [holder (field = d)]

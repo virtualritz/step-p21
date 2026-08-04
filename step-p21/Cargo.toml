@@ -1,0 +1,34 @@
+[package]
+name = "step-p21"
+version = "0.5.0"
+authors = ["Moritz Moeller <virtualritz@protonmail.com>", "Toshiki Teramura <teramura@ricos.co.jp>", "Yoshinori Tanimura <tanimura@ricos.co.jp>"]
+edition = "2021"
+rust-version = "1.75.0"
+
+description   = "ISO 10303-21 (STEP file) parser and serde-based entity tables"
+documentation = "https://docs.rs/step-p21/step-p21/index.html"
+repository    = "https://github.com/virtualritz/step-p21"
+keywords      = ["step", "cad", "iso10303", "parser"]
+license       = "Apache-2.0"
+readme        = "../README.md"
+categories    = ["science"]
+
+[dependencies]
+derive_more = "0.99.18"
+derive-new = "0.5.9"
+nom = "7.1.3"
+serde = { version = "1.0.210", features = ["derive"] }
+thiserror = "1.0.63"
+Inflector = "0.11.4"
+itertools = "0.10.5"
+
+[dependencies.step-p21-derive]
+path = "../step-p21-derive"
+version = "0.5.0"
+
+[dev-dependencies]
+anyhow = "1.0.89"
+maplit = "1.0.2"
+
+[dev-dependencies.espr-derive]
+path = "../espr-derive"

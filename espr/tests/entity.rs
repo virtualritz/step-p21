@@ -24,8 +24,8 @@ fn entity() {
 
     insta::assert_snapshot!(tt, @r###"
     pub mod test_schema {
-        use ruststep::{as_holder, derive_more::*, primitive::*, Holder, TableInit};
         use std::collections::HashMap;
+        use step_p21::{as_holder, derive_more::*, primitive::*, Holder, TableInit};
         #[derive(Debug, Clone, PartialEq, Default, TableInit)]
         pub struct Tables {
             a: HashMap<u64, as_holder!(A)>,

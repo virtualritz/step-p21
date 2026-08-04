@@ -6,8 +6,8 @@ edition = "2021"
 rust-version = "1.75.0"
 
 description   = "EXPRESS Language compiler"
-documentation = "https://ricosjp.github.io/ruststep/espr/index.html"
-repository    = "https://github.com/ricosjp/ruststep"
+documentation = "https://ricosjp.github.io/step-p21/espr/index.html"
+repository    = "https://github.com/virtualritz/step-p21"
 keywords      = ["step", "cad", "compiler"]
 license       = "Apache-2.0"
 readme        = "../README.md"

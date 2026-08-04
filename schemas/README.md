@@ -1,7 +1,7 @@
 EXPRESS Schemas
 ================
 
-**This is not a part of ruststep.**
+**This is not a part of step-p21.**
 These EXPRESS schemas are included in this git repository in order to test our EXPRESS compiler.
 
 Copied from http://www.steptools.com/stds/archive/ with minor modification. It says
