@@ -16,6 +16,12 @@ pub fn literal(input: &str) -> ParseResult<Literal> {
 }
 
 /// 255 logical_literal = `FALSE` | `TRUE` | `UNKNOWN` .
+///
+/// The keyword must be followed by something that cannot continue an
+/// identifier, or `FALSE_POSITIVE` would tokenize as `FALSE` plus a stray
+/// `_POSITIVE`. An EXPRESS `simple_id` continues with a letter, a digit **or an
+/// underscore**, so all three have to be excluded -- guarding against letters
+/// alone left identifiers like `TRUE_NORTH`, `TRUE2` and `UNKNOWN_9` unparsable.
 pub fn logical_literal(input: &str) -> ParseResult<Logical> {
     tuple((
         alt((
@@ -23,10 +29,20 @@ pub fn logical_literal(input: &str) -> ParseResult<Logical> {
             value(Logical::False, tag("FALSE")),
             value(Logical::Unknown, tag("UNKNOWN")),
         )),
-        peek(not(remarked(nom::character::complete::alpha1))),
+        peek(not(remarked(identifier_continuation))),
     ))
-    .map(|(logical, _non_alpha)| logical)
+    .map(|(logical, _boundary)| logical)
     .parse(input)
+}
+
+/// One or more characters that may continue an EXPRESS `simple_id`.
+///
+/// A plain `fn` rather than a `take_while1` closure because the combinators it
+/// feeds require `Clone`, which the closure is not.
+fn identifier_continuation(
+    input: &str,
+) -> nom::IResult<&str, &str, nom::error::VerboseError<&str>> {
+    nom::bytes::complete::take_while1(|c: char| c.is_alphanumeric() || c == '_')(input)
 }
 
 /// 141 integer_literal = digits .

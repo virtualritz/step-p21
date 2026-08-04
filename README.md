@@ -1,42 +1,60 @@
-**This project is still in experimental stage. DO NOT USE FOR PRODUCT.**
-
-> ## Fork notice
->
-> `step-p21` is a fork of [`ricosjp/ruststep`](https://github.com/ricosjp/ruststep)
-> (Apache-2.0), created because the two crates it publishes had gone stale on
-> crates.io: `ruststep-v0.4.0` was tagged **2024-09-20** and the last upstream
-> commit is **2025-03-20**, leaving five unreleased commits stranded on `master`.
->
-> Two of those five fix ISO 10303-21 syntax that real CAD exports rely on, and
-> without a release they cannot reach downstream users -- a `[patch.crates-io]`
-> entry fixes your own build but never your dependents:
->
-> * `4197eee` -- `''` inside a string is Part 21's escape for a literal
->   apostrophe, which imperial CAD emits as an inch mark in thread callouts.
-> * `90fdc93` -- `()` is a legal empty aggregate, e.g.
->   `ADVANCED_FACE('',(),#57075,.T.)`.
->
-> ### Changes from upstream
->
-> * `ruststep` -> `step-p21` and `ruststep-derive` -> `step-p21-derive`. The name
->   states the scope: ISO 10303-**21**, the clear-text encoding of the exchange
->   structure. The *vocabulary* (Part 42 geometry, the APs) is a consumer's
->   concern, not this crate's.
-> * `step-p21-derive` resolves its runtime path via `crate_name("step-p21")`.
-> * Added `step-p21/tests/unreleased_syntax_fixes.rs`, pinning both fixes through
->   the public `parse` and `exchange::parameter` entry points. Upstream tested
->   each sub-parser; a published crate owes the contract its callers use.
-> * `espr` and `espr-derive` are retained unrenamed and unpublished. They are the
->   EXPRESS (Part 11) compiler, kept because this workspace's own tests use
->   `espr_derive::inline_express!` to exercise the `Holder`/table machinery.
->
-> Upstream fixes are welcome back; nothing here is intended as a hostile fork.
+**Experimental: the API will change. Not recommended for production use yet.**
 
 step-p21
 =========
 
-Crates for STEP (Standard for the Exchange of Product model data) written in pure Rust
-aimed at replacing [stepcode](https://github.com/stepcode/stepcode).
+## Overview
+
+`step-p21` reads and writes **ISO 10303-21**, the clear-text encoding of the
+STEP exchange structure -- the syntax of a `.step` file. It is a fork of
+[`ruststep`](https://github.com/ricosjp/ruststep).
+
+The name states the scope. Part 21 is the *encoding*; what `PLANE` or
+`ADVANCED_FACE` mean lives in Part 42, the AICs and the application protocols
+(AP203, AP214, AP242), and that vocabulary is a consumer's concern. This crate
+gives you the syntax tree and the table machinery to hydrate typed entities from
+it.
+
+## Why Was This Forked?
+
+**Upstream stopped publishing.** `ruststep-v0.4.0` was tagged **2024-09-20**, and
+the last commit on `master` is **2025-03-20**, which left five commits stranded:
+fixed in the repository, absent from every released version.
+
+Two of those five fix Part 21 syntax that real CAD exports depend on:
+
+- `''` inside a string is Part 21's escape for a literal apostrophe. Imperial CAD
+  emits it constantly as an inch mark in thread callouts. Mis-parsing it ends the
+  string early and derails the rest of the file.
+- `()` is a legal **empty aggregate**, e.g. `ADVANCED_FACE('',(),#57075,.T.)`.
+  Rejecting it fails the whole parse.
+
+Each defect made entire real assemblies unreadable, and a `[patch.crates-io]`
+entry cannot help: it fixes the patcher's own build and never its dependents. The
+only way those fixes reach downstream users is a published crate. Hence this one.
+
+Verified rather than assumed: on released `ruststep` 0.4.0 a file containing
+`ANNOTATION_PLANE('name',(#1),#1,())` fails to parse; on `step-p21` it parses.
+That is upstream issue
+[#256](https://github.com/ricosjp/ruststep/issues/256) outright, and it is the
+demonstrated cause of the symptom reported in
+[#252](https://github.com/ricosjp/ruststep/issues/252).
+
+The second goal is **ergonomics**. The upstream codebase carries terse
+EXPRESS-flavored names and occasionally confusing phrasing. Public names here are
+spelled out, documentation is written to be read by someone who is not already
+fluent in ISO 10303, and the language is kept inclusive and plain -- whether you
+are a non-native English speaker or a seasoned CAD engineer. Every rename ships a
+`#[deprecated]` alias, so code written against `ruststep` keeps compiling.
+
+Fixes that are not fork-specific are worth offering upstream. Nothing here is
+intended as a hostile fork.
+
+### Changes Since the Fork
+
+See [`CHANGELOG.md`](CHANGELOG.md); Apache-2.0 requires stating modifications, so
+divergence is recorded there rather than summarised loosely.
+
 
 | name | crates.io | docs.rs | master | description |
 |:-----|:----------|:--------|:-------|-------------|
