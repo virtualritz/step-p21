@@ -103,7 +103,12 @@ impl From<FieldType> for syn::Type {
                 syn::parse_quote! { Box<#ty> }
             }
         };
-        syn::Type::Path(syn::TypePath { qself: None, path })
+        // syn 3 added `attrs` to `TypePath`; a synthesised type carries none.
+        syn::Type::Path(syn::TypePath {
+            attrs: Vec::new(),
+            qself: None,
+            path,
+        })
     }
 }
 

@@ -12,7 +12,6 @@ use nom::{
     character::complete::{char, digit0, digit1, multispace0, none_of, satisfy},
     combinator::opt,
     multi::{many0, many1},
-    sequence::tuple,
 };
 
 /// sign = `+` | `-` .
@@ -99,9 +98,12 @@ pub fn enumeration(input: &str) -> ParseResult<'_, String> {
 // Root error for u64 overflow
 //
 // FIXME Though it works, should we use `VerboseErrorKind::Context` for this usage?
-fn u64_overflow(input: &str) -> nom::Err<nom::error::VerboseError<&str>> {
-    nom::Err::Failure(nom::error::VerboseError {
-        errors: vec![(input, nom::error::VerboseErrorKind::Context("u64-overflow"))],
+fn u64_overflow(input: &str) -> nom::Err<nom_language::error::VerboseError<&str>> {
+    nom::Err::Failure(nom_language::error::VerboseError {
+        errors: vec![(
+            input,
+            nom_language::error::VerboseErrorKind::Context("u64-overflow"),
+        )],
     })
 }
 

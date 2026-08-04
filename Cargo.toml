@@ -40,13 +40,21 @@ insta = "1"
 itertools = "0.15"
 katexit = "0.1"
 maplit = "1"
-nom = "7"
+nom = "8"
+# nom 8 moved `VerboseError` and `convert_error` out of the core crate.
+nom-language = "0.1"
+# NOTE: `espr` pins nom 7 rather than taking this. It implements nom's
+# `Parser` trait BY HAND for its remark-capturing `Map`, and nom 8 replaced
+# `parse` with a `process` method generic over `OutputMode` -- a redesign of
+# that layer, not a version bump. espr is unpublished and used only by tests
+# and the `esprc` binary, so the two majors coexist without ever meeting in a
+# shared type.
 proc-macro-crate = "3"
 proc-macro-error2 = "2"
 proc-macro2 = "1"
 quote = "1"
 serde = { version = "1", features = ["derive"] }
-syn = { version = "2", features = ["full", "extra-traits"] }
+syn = { version = "3", features = ["full", "extra-traits"] }
 thiserror = "2"
 trybuild = "1"
 

@@ -16,39 +16,41 @@ use nom::{
     bytes::complete::tag,
     character::complete::{char, multispace0, multispace1, none_of},
     combinator::{not, opt, peek, value},
-    error::VerboseError,
     multi::{many0, many1},
-    sequence::tuple,
 };
+use nom_language::error::VerboseError;
 
 /// Parse result
 pub type ParseResult<'a, X> = IResult<&'a str, X, VerboseError<&'a str>>;
 
 /// Alias of `nom::Parser`
-pub trait ExchangeParser<'a, X>: Clone + nom::Parser<&'a str, X, VerboseError<&'a str>> {}
+pub trait ExchangeParser<'a, X>:
+    Clone + nom::Parser<&'a str, Output = X, Error = VerboseError<&'a str>>
+{
+}
 
 impl<'a, X, T> ExchangeParser<'a, X> for T where
-    T: Clone + nom::Parser<&'a str, X, VerboseError<&'a str>>
+    T: Clone + nom::Parser<&'a str, Output = X, Error = VerboseError<&'a str>>
 {
 }
 
 pub fn char_<'a>(c: char) -> impl ExchangeParser<'a, char> {
     move |input| {
-        let (input, c) = nom::character::complete::char(c)(input)?;
+        let (input, c) = nom::character::complete::char(c).parse(input)?;
         Ok((input, c))
     }
 }
 
 pub fn tag_<'a>(name: &'static str) -> impl ExchangeParser<'a, &'a str> {
     move |input| {
-        let (input, c) = nom::bytes::complete::tag(name)(input)?;
+        let (input, c) = nom::bytes::complete::tag(name).parse(input)?;
         Ok((input, c))
     }
 }
 
 pub fn opt_<'a, O>(f: impl ExchangeParser<'a, O>) -> impl ExchangeParser<'a, Option<O>> {
     move |input| {
-        let (input, c) = nom::combinator::opt(f.clone())(input)?;
+        let (input, c) = nom::combinator::opt(f.clone()).parse(input)?;
         Ok((input, c))
     }
 }
@@ -391,4 +393,13 @@ mod tests {
         assert_eq!(res, "");
         assert_eq!(digits, &['1', '2']);
     }
+}
+
+/// Identity shim for nom 7's `sequence::tuple`, which nom 8 removed.
+///
+/// nom 8 implements `Parser` for tuples directly, so wrapping is no longer
+/// needed -- but keeping the call sites spelled `tuple((a, b, c))` states the
+/// intent, and matches how the WSN productions read in the standard.
+pub fn tuple<T>(parsers: T) -> T {
+    parsers
 }
