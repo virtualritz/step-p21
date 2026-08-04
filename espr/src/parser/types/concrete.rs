@@ -5,7 +5,7 @@ use super::{
 use crate::ast::*;
 
 /// 193 concrete_types = [aggregation_types] | [simple_types] | [type_ref].
-pub fn concrete_types(input: &str) -> ParseResult<Type> {
+pub fn concrete_types(input: &str) -> ParseResult<'_, Type> {
     alt((
         aggregation_types,
         simple_types.map(Type::Simple),
@@ -15,12 +15,12 @@ pub fn concrete_types(input: &str) -> ParseResult<Type> {
 }
 
 /// 172 aggregation_types = [array_type] | [bag_type] | [list_type] | [set_type] .
-pub fn aggregation_types(input: &str) -> ParseResult<Type> {
+pub fn aggregation_types(input: &str) -> ParseResult<'_, Type> {
     alt((array_type, bag_type, list_type, set_type)).parse(input)
 }
 
 /// 175 array_type = ARRAY [bound_spec] OF \[ OPTIONAL \] \[ UNIQUE \] [instantiable_type] .
-pub fn array_type(input: &str) -> ParseResult<Type> {
+pub fn array_type(input: &str) -> ParseResult<'_, Type> {
     tuple((
         tag("ARRAY"),
         bound_spec,
@@ -39,7 +39,7 @@ pub fn array_type(input: &str) -> ParseResult<Type> {
 }
 
 /// 180 bag_type = BAG \[ [bound_spec] \] OF [instantiable_type] .
-pub fn bag_type(input: &str) -> ParseResult<Type> {
+pub fn bag_type(input: &str) -> ParseResult<'_, Type> {
     tuple((tag("BAG"), opt(bound_spec), tag("OF"), instantiable_type))
         .map(|(_set, bound, _of, base)| Type::Bag {
             bound,
@@ -49,7 +49,7 @@ pub fn bag_type(input: &str) -> ParseResult<Type> {
 }
 
 /// 250 list_type = LIST \[ [bound_spec] \] OF \[ UNIQUE \] [instantiable_type] .
-pub fn list_type(input: &str) -> ParseResult<Type> {
+pub fn list_type(input: &str) -> ParseResult<'_, Type> {
     tuple((
         tag("LIST"),
         opt(bound_spec),
@@ -66,7 +66,7 @@ pub fn list_type(input: &str) -> ParseResult<Type> {
 }
 
 /// 303 set_type = SET \[ [bound_spec] \] OF [instantiable_type] .
-pub fn set_type(input: &str) -> ParseResult<Type> {
+pub fn set_type(input: &str) -> ParseResult<'_, Type> {
     tuple((tag("SET"), opt(bound_spec), tag("OF"), instantiable_type))
         .map(|(_set, bound, _of, base)| Type::Set {
             bound,
@@ -76,23 +76,23 @@ pub fn set_type(input: &str) -> ParseResult<Type> {
 }
 
 /// 183 bound_1 = [numeric_expression] .
-pub fn bound_1(input: &str) -> ParseResult<Expression> {
+pub fn bound_1(input: &str) -> ParseResult<'_, Expression> {
     numeric_expression(input)
 }
 
 /// 184 bound_2 = [numeric_expression] .
-pub fn bound_2(input: &str) -> ParseResult<Expression> {
+pub fn bound_2(input: &str) -> ParseResult<'_, Expression> {
     numeric_expression(input)
 }
 
 /// 185 bound_spec = `[` [bound_1] `:` [bound_2] `]` .
-pub fn bound_spec(input: &str) -> ParseResult<Bound> {
+pub fn bound_spec(input: &str) -> ParseResult<'_, Bound> {
     tuple((char('['), bound_1, char(':'), bound_2, char(']')))
         .map(|(_open, lower, _comma, upper, _close)| Bound { lower, upper })
         .parse(input)
 }
 
 /// 240 instantiable_type = [concrete_types] | [entity_ref] .
-pub fn instantiable_type(input: &str) -> ParseResult<Type> {
+pub fn instantiable_type(input: &str) -> ParseResult<'_, Type> {
     alt((concrete_types, entity_ref.map(Type::Named))).parse(input)
 }

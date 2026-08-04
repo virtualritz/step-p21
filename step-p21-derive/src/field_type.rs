@@ -1,6 +1,6 @@
 use super::*;
 
-use proc_macro_error::{Diagnostic, Level};
+use proc_macro_error2::{Diagnostic, Level};
 use std::convert::{TryFrom, TryInto};
 
 /// espr-generated field type

@@ -42,7 +42,7 @@ use std::str::FromStr;
 
 /// AST portion
 pub trait AST: FromStr<Err = crate::error::Error> {
-    fn parse(input: &str) -> parser::combinator::ParseResult<Self>;
+    fn parse(input: &str) -> parser::combinator::ParseResult<'_, Self>;
 }
 
 macro_rules! derive_ast_from_str {
@@ -63,7 +63,7 @@ macro_rules! derive_ast_from_str {
         }
 
         impl AST for $ast {
-            fn parse(input: &str) -> parser::combinator::ParseResult<Self> {
+            fn parse(input: &str) -> parser::combinator::ParseResult<'_, Self> {
                 $parse(input)
             }
         }

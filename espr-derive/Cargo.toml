@@ -1,15 +1,15 @@
 [package]
 name = "espr-derive"
-version = "0.4.0"
-edition = "2021"
-authors = ["Yoshinori Tanimura <tanimura@ricos.co.jp>", "Toshiki Teramura <teramura@ricos.co.jp"]
-rust-version = "1.75.0"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+rust-version.workspace = true
 
-description   = "Procedual macro for running espr compiler"
-documentation = "https://ricosjp.github.io/step-p21/espr_derive/index.html"
-repository    = "https://github.com/virtualritz/step-p21"
+description   = "Procedural macro for running the espr compiler"
+documentation = "https://docs.rs/espr-derive"
+repository.workspace = true
 keywords      = ["step", "cad", "compiler", "proc-macro"]
-license       = "Apache-2.0"
+license.workspace = true
 readme        = "../README.md"
 categories    = ["science", "development-tools"]
 
@@ -17,16 +17,14 @@ categories    = ["science", "development-tools"]
 proc-macro = true
 
 [dependencies]
-quote = "1.0.37"
-proc-macro2 = "1.0.86"
-syn = { version = "2.0.77", features = ["full", "extra-traits"] }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }
+syn = { workspace = true }
 
-[dependencies.espr]
-version = "0.4.0"
-path = "../espr"
+espr = { workspace = true }
 
 [dev-dependencies]
-step-p21 = { version = "0.5.0", path = "../step-p21" }
-step-p21-derive = { version = "0.5.0", path = "../step-p21-derive" }
-serde = "1.0.210"
-derive-new = "0.5.9"
+step-p21 = { workspace = true }
+step-p21-derive = { workspace = true }
+serde = { workspace = true }
+derive-new = { workspace = true }

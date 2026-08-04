@@ -22,7 +22,12 @@ fn logical_literal() {
     insta::assert_snapshot!(tt, @r###"
     pub mod IFC4X3_DEV_6a23ae8 {
         use std::collections::HashMap;
-        use step_p21::{as_holder, derive_more::*, primitive::*, Holder, TableInit};
+        use step_p21::{
+            as_holder,
+            derive_more::{AsMut, AsRef, Deref, DerefMut, From, Into},
+            primitive::*,
+            Holder, TableInit,
+        };
         #[derive(Debug, Clone, PartialEq, Default, TableInit)]
         pub struct Tables {
             IfcGeometricRepresentationContext:

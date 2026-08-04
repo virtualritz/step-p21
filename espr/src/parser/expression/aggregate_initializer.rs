@@ -2,7 +2,7 @@ use super::{super::combinator::*, *};
 use crate::ast::*;
 
 /// 169 aggregate_initializer = `[` \[ [element] { `,` [element] } \] `]` .
-pub fn aggregate_initializer(input: &str) -> ParseResult<Expression> {
+pub fn aggregate_initializer(input: &str) -> ParseResult<'_, Expression> {
     tuple((
         char('['),
         opt(comma_separated(element)).map(|opt| opt.unwrap_or_default()),
@@ -13,7 +13,7 @@ pub fn aggregate_initializer(input: &str) -> ParseResult<Expression> {
 }
 
 /// 203 element = [expression] \[ `:` [repetition] \] .
-pub fn element(input: &str) -> ParseResult<Element> {
+pub fn element(input: &str) -> ParseResult<'_, Element> {
     tuple((expression, opt(tuple((char(':'), repetition)))))
         .map(|(expr, opt)| Element {
             expr,
@@ -23,12 +23,12 @@ pub fn element(input: &str) -> ParseResult<Element> {
 }
 
 /// 287 repetition = [numeric_expression] .
-pub fn repetition(input: &str) -> ParseResult<Expression> {
+pub fn repetition(input: &str) -> ParseResult<'_, Expression> {
     numeric_expression(input)
 }
 
 /// 262 numeric_expression = [simple_expression] .
-pub fn numeric_expression(input: &str) -> ParseResult<Expression> {
+pub fn numeric_expression(input: &str) -> ParseResult<'_, Expression> {
     simple_expression(input)
 }
 

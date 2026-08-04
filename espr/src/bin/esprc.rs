@@ -1,21 +1,25 @@
 //! Executable for espr EXPRESS language compiler
 
+use clap::Parser;
 use espr::{ast::SyntaxTree, codegen::rust::*, ir::IR};
 use std::{fs, path::*};
-use structopt::StructOpt;
 
-#[derive(Debug, StructOpt)]
+/// Compile an EXPRESS schema into Rust.
+#[derive(Debug, Parser)]
+#[command(about, version)]
 struct Arguments {
-    #[structopt(long = "num-error-lines", default_value = "10")]
-    num_lines: usize,
-    #[structopt(long = "check", help = "Check input EXPRESS definitions can be parsed")]
+    /// How many lines of the offending source to print per syntax error.
+    #[arg(long = "num-error-lines", default_value_t = 10)]
+    number_of_error_lines: usize,
+    /// Check that the input EXPRESS definitions parse, then stop.
+    #[arg(long)]
     check: bool,
-    #[structopt(parse(from_os_str))]
+    /// The EXPRESS schema to compile.
     source: PathBuf,
 }
 
 fn main() {
-    let args = Arguments::from_args();
+    let args = Arguments::parse();
     let src = fs::read_to_string(&args.source).expect("Failed to load EXPRESS source code");
     let st = match SyntaxTree::parse(&src) {
         Ok(st) => st,
@@ -25,7 +29,7 @@ fn main() {
                     "Syntax Error occurred while parsing following line [{:?}]:",
                     kind
                 );
-                for line in code.lines().take(args.num_lines) {
+                for line in code.lines().take(args.number_of_error_lines) {
                     eprintln!("> {}", line);
                 }
                 eprintln!();

@@ -1,6 +1,6 @@
 use inflector::Inflector;
+use proc_macro_error2::OptionExt;
 use proc_macro2::{Span, TokenStream as TokenStream2};
-use proc_macro_error::OptionExt;
 use quote::quote;
 use std::convert::*;
 

@@ -2,8 +2,8 @@
 
 use super::*;
 use crate::ast;
-use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 
 /// Expression appears in `SUBTYPE_CONSTRAINT` with resolved [Path]
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -32,10 +32,10 @@ impl ConstraintExpr {
     pub fn andor_mut(&mut self, rhs: Self) {
         use ConstraintExpr::*;
         match (self, rhs) {
-            (AndOr(ref mut a), AndOr(mut b)) => {
+            (AndOr(a), AndOr(mut b)) => {
                 a.append(&mut b);
             }
-            (AndOr(ref mut a), b) => {
+            (AndOr(a), b) => {
                 a.push(b);
             }
             (a, b @ AndOr(_)) => {

@@ -1,6 +1,6 @@
 use inflector::Inflector;
+use proc_macro_error2::{OptionExt, abort_call_site};
 use proc_macro2::TokenStream as TokenStream2;
-use proc_macro_error::{abort_call_site, OptionExt};
 use quote::quote;
 
 use crate::common::step_p21_crate;

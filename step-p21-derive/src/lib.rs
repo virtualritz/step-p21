@@ -22,8 +22,8 @@
 //!
 
 use proc_macro::TokenStream;
+use proc_macro_error2::{abort_call_site, proc_macro_error};
 use proc_macro2::TokenStream as TokenStream2;
-use proc_macro_error::{abort_call_site, proc_macro_error};
 use quote::quote;
 use std::convert::*;
 

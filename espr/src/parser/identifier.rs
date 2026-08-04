@@ -2,7 +2,7 @@ use super::{basis::*, combinator::*};
 
 macro_rules! impl_id {
     ($name:ident) => {
-        pub fn $name(input: &str) -> ParseResult<String> {
+        pub fn $name(input: &str) -> ParseResult<'_, String> {
             remarked(simple_id).parse(input)
         }
     };
@@ -39,12 +39,12 @@ impl_id!(type_ref);
 impl_id!(variable_ref);
 
 /// 228 general_ref = [parameter_ref] | [variable_ref] .
-pub fn general_ref(input: &str) -> ParseResult<String> {
+pub fn general_ref(input: &str) -> ParseResult<'_, String> {
     alt((parameter_ref, variable_ref)).parse(input)
 }
 
 /// 289 resource_ref = [constant_ref] | [entity_ref] | [function_ref] | [procedure_ref] | [type_ref] .
-pub fn resource_ref(input: &str) -> ParseResult<String> {
+pub fn resource_ref(input: &str) -> ParseResult<'_, String> {
     alt((
         constant_ref,
         entity_ref,
@@ -56,6 +56,6 @@ pub fn resource_ref(input: &str) -> ParseResult<String> {
 }
 
 /// 284 rename_id = [constant_id] | [entity_id] | [function_id] | [procedure_id] | [type_id] .
-pub fn rename_id(input: &str) -> ParseResult<String> {
+pub fn rename_id(input: &str) -> ParseResult<'_, String> {
     alt((constant_id, entity_id, function_id, procedure_id, type_id)).parse(input)
 }

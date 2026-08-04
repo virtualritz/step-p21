@@ -4,13 +4,13 @@
 
 use super::combinator::*;
 use nom::{
+    Parser,
     branch::alt,
     character::complete::{char, satisfy},
-    Parser,
 };
 
 /// latin_codepoint = [space] | [digit] | [lower] | [upper] | [special] | [reverse_solidus] | [apostrophe]
-pub fn latin_codepoint(input: &str) -> ParseResult<char> {
+pub fn latin_codepoint(input: &str) -> ParseResult<'_, char> {
     alt((
         space,
         digit,
@@ -24,12 +24,12 @@ pub fn latin_codepoint(input: &str) -> ParseResult<char> {
 }
 
 /// space = ` ` .
-pub fn space(input: &str) -> ParseResult<char> {
+pub fn space(input: &str) -> ParseResult<'_, char> {
     char(' ')(input)
 }
 
 /// digit = `0` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9` .
-pub fn digit(input: &str) -> ParseResult<char> {
+pub fn digit(input: &str) -> ParseResult<'_, char> {
     satisfy(|c| matches!(c, '0'..='9')).parse(input)
 }
 
@@ -37,7 +37,7 @@ pub fn digit(input: &str) -> ParseResult<char> {
 ///       | `i` | `j` | `k` | `l` | `m` | `n` | `o` | `p`
 ///       | `q` | `r` | `s` | `t` | `u` | `v` | `w` | `x`
 ///       | `y` | `z` .
-pub fn lower(input: &str) -> ParseResult<char> {
+pub fn lower(input: &str) -> ParseResult<'_, char> {
     satisfy(|c| matches!(c, 'a'..='z')).parse(input)
 }
 
@@ -45,12 +45,12 @@ pub fn lower(input: &str) -> ParseResult<char> {
 ///       | `I` | `J` | `K` | `L` | `M` | `N` | `O` | `P`
 ///       | `Q` | `R` | `S` | `T` | `U` | `V` | `W` | `X`
 ///       | `Y` | `Z` | `_` .
-pub fn upper(input: &str) -> ParseResult<char> {
+pub fn upper(input: &str) -> ParseResult<'_, char> {
     satisfy(|c| matches!(c, 'A'..='Z' | '_')).parse(input)
 }
 
 /// special  = `!` | `"` | `*` | `$` | `%` | `&` | `.` | `#` | `+` | `,`  | `-` | `(` | `)` | `?` | `/` | `:` | `;` | `<`  | `=` | `>` | `@` | `[` | `]` | `{` | `|` | `}`  | `^` | \` | `~` .
-pub fn special(input: &str) -> ParseResult<char> {
+pub fn special(input: &str) -> ParseResult<'_, char> {
     satisfy(|c| {
         matches!(
             c,
@@ -88,11 +88,11 @@ pub fn special(input: &str) -> ParseResult<char> {
 }
 
 /// reverse_solidus = `\\` .
-pub fn reverse_solidus(input: &str) -> ParseResult<char> {
+pub fn reverse_solidus(input: &str) -> ParseResult<'_, char> {
     char('\\')(input)
 }
 
 /// apostrophe = `'` .
-pub fn apostrophe(input: &str) -> ParseResult<char> {
+pub fn apostrophe(input: &str) -> ParseResult<'_, char> {
     char('\'')(input)
 }

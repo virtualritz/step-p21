@@ -2,14 +2,14 @@ use super::super::{combinator::*, identifier::*};
 use crate::ast::*;
 
 /// 211 enumeration_items = `(` [enumeration_id] { `,` [enumeration_id] } `)` .
-pub fn enumeration_items(input: &str) -> ParseResult<Vec<String>> {
+pub fn enumeration_items(input: &str) -> ParseResult<'_, Vec<String>> {
     tuple((char('('), comma_separated(enumeration_id), char(')')))
         .map(|(_open, enums, _close)| enums)
         .parse(input)
 }
 
 /// 213 enumeration_type = \[ EXTENSIBLE \] ENUMERATION \[ ( OF [enumeration_items] ) | enumeration_extension \] .
-pub fn enumeration_type(input: &str) -> ParseResult<Type> {
+pub fn enumeration_type(input: &str) -> ParseResult<'_, Type> {
     // FIXME enumeration_extension
     tuple((
         opt(tag("EXTENSIBLE")),
@@ -74,10 +74,12 @@ mod tests {
         );
 
         // GENERIC_ENTITY is only supported for SELECT
-        assert!(super::enumeration_type(
-            "EXTENSIBLE GENERIC_ENTITY ENUMERATION OF (up, down, left, right)"
-        )
-        .finish()
-        .is_err());
+        assert!(
+            super::enumeration_type(
+                "EXTENSIBLE GENERIC_ENTITY ENUMERATION OF (up, down, left, right)"
+            )
+            .finish()
+            .is_err()
+        );
     }
 }

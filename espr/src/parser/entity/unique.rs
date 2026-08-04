@@ -5,7 +5,7 @@ use crate::{
 };
 
 /// 333 unique_clause = UNIQUE [unique_rule] `;` { [unique_rule] `;` } .
-pub fn unique_clause(input: &str) -> ParseResult<UniqueClause> {
+pub fn unique_clause(input: &str) -> ParseResult<'_, UniqueClause> {
     tuple((tag("UNIQUE"), many0(tuple((unique_rule, char(';'))))))
         .map(|(_unique, seq)| UniqueClause {
             rules: seq.into_iter().map(|(rule, _semicolon)| rule).collect(),
@@ -14,7 +14,7 @@ pub fn unique_clause(input: &str) -> ParseResult<UniqueClause> {
 }
 
 /// 334 unique_rule = \[ [rule_label_id] `:` \] [referenced_attribute] { `,` [referenced_attribute] } .
-pub fn unique_rule(input: &str) -> ParseResult<UniqueRule> {
+pub fn unique_rule(input: &str) -> ParseResult<'_, UniqueRule> {
     tuple((
         opt(tuple((rule_label_id, char(':')))),
         comma_separated(referenced_attribute),

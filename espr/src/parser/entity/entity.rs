@@ -5,7 +5,7 @@ use crate::{
 };
 
 /// 215 explicit_attr = [attribute_decl] { `,` [attribute_decl] } `:` \[ OPTIONAL \] [parameter_type] `;` .
-pub fn explicit_attr(input: &str) -> ParseResult<Vec<EntityAttribute>> {
+pub fn explicit_attr(input: &str) -> ParseResult<'_, Vec<EntityAttribute>> {
     tuple((
         comma_separated(attribute_decl),
         char(':'),
@@ -27,7 +27,9 @@ pub fn explicit_attr(input: &str) -> ParseResult<Vec<EntityAttribute>> {
 }
 
 /// 207 entity_head = ENTITY [entity_id] [subsuper] `;` .
-pub fn entity_head(input: &str) -> ParseResult<(String, Option<Constraint>, Option<SubTypeDecl>)> {
+pub fn entity_head(
+    input: &str,
+) -> ParseResult<'_, (String, Option<Constraint>, Option<SubTypeDecl>)> {
     tuple((
         tag("ENTITY"), // parse with trailing space
         entity_id,
@@ -39,7 +41,7 @@ pub fn entity_head(input: &str) -> ParseResult<(String, Option<Constraint>, Opti
 }
 
 /// 204 entity_body = { [explicit_attr] } \[ [derive_clause] \] \[ [inverse_clause] \] \[ [unique_clause] \] \[ [where_clause] \] .
-pub fn entity_body(input: &str) -> ParseResult<EntityBody> {
+pub fn entity_body(input: &str) -> ParseResult<'_, EntityBody> {
     tuple((
         many0(explicit_attr),
         opt(derive_clause),
@@ -60,7 +62,7 @@ pub fn entity_body(input: &str) -> ParseResult<EntityBody> {
 }
 
 /// 206 entity_decl = [entity_head] [entity_body] END_ENTITY `;` .
-pub fn entity_decl(input: &str) -> ParseResult<Entity> {
+pub fn entity_decl(input: &str) -> ParseResult<'_, Entity> {
     tuple((entity_head, entity_body, tag("END_ENTITY"), char(';')))
         .map(
             |(

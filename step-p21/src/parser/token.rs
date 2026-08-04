@@ -7,21 +7,21 @@ use crate::{
 use nom::bytes::complete::tag;
 use nom::combinator::map;
 use nom::{
+    Parser,
     branch::alt,
     character::complete::{char, digit0, digit1, multispace0, none_of, satisfy},
     combinator::opt,
     multi::{many0, many1},
     sequence::tuple,
-    Parser,
 };
 
 /// sign = `+` | `-` .
-pub fn sign(input: &str) -> ParseResult<char> {
+pub fn sign(input: &str) -> ParseResult<'_, char> {
     alt((char('+'), char('-'))).parse(input)
 }
 
 /// integer = \[ [sign] \] [digit] { [digit] } .
-pub fn integer(input: &str) -> ParseResult<i64> {
+pub fn integer(input: &str) -> ParseResult<'_, i64> {
     tuple((opt(sign), multispace0, digit1))
         .map(|(sign, _space, numbers)| {
             let num: i64 = numbers.parse().expect("Failed to parse into integer");
@@ -34,7 +34,7 @@ pub fn integer(input: &str) -> ParseResult<i64> {
 }
 
 /// `E` \[ [sign] \] [digit] { [digit] } .
-fn exponent(input: &str) -> ParseResult<i64> {
+fn exponent(input: &str) -> ParseResult<'_, i64> {
     tuple((char('E'), multispace0, opt(sign), multispace0, digit1))
         .map(|(_e, _sp1, sign, _sp2, digit)| {
             let num: i64 = digit.parse().expect("Failed to parse integer in exponent");
@@ -47,7 +47,7 @@ fn exponent(input: &str) -> ParseResult<i64> {
 }
 
 /// real = \[ [sign] \] [digit] { [digit] } `.` { [digit] } \[ `E` \[ [sign] \] [digit] { [digit] } \] .
-pub fn real(input: &str) -> ParseResult<f64> {
+pub fn real(input: &str) -> ParseResult<'_, f64> {
     tuple((
         opt(sign),
         multispace0,
@@ -69,7 +69,7 @@ pub fn real(input: &str) -> ParseResult<f64> {
 }
 
 /// string = `'` { [special] | [digit] | [space] | [lower] | [upper] | high_codepoint | [apostrophe] [apostrophe] | [reverse_solidus] [reverse_solidus] | control_directive } `'` .
-pub fn string(input: &str) -> ParseResult<String> {
+pub fn string(input: &str) -> ParseResult<'_, String> {
     let escaped_char = map(tag("''"), |_| '\''); // Parse '' as a single '
     let normal_char = none_of("'"); // Parse any character except '
 
@@ -83,14 +83,14 @@ pub fn string(input: &str) -> ParseResult<String> {
 /// resource = `<` UNIVERSAL_RESOURCE_IDENTIFIER `>` .
 ///
 /// Parse as string, without validating as URI
-pub fn resource(input: &str) -> ParseResult<URI> {
+pub fn resource(input: &str) -> ParseResult<'_, URI> {
     tuple((char('<'), many0(none_of(">")), char('>')))
         .map(|(_start, s, _end)| URI(s.iter().collect()))
         .parse(input)
 }
 
 /// enumeration = `.` [upper] { [upper] | [digit] } `.` .
-pub fn enumeration(input: &str) -> ParseResult<String> {
+pub fn enumeration(input: &str) -> ParseResult<'_, String> {
     tuple((char('.'), standard_keyword, char('.')))
         .map(|(_head, name, _tail)| name)
         .parse(input)
@@ -117,7 +117,7 @@ fn u64_overflow(input: &str) -> nom::Err<nom::error::VerboseError<&str>> {
 /// -------
 /// - FIXME: If the input cannot be represented by `u64`, i.e. larger than [std::u64::MAX]
 ///
-pub fn entity_instance_name(input: &str) -> ParseResult<u64> {
+pub fn entity_instance_name(input: &str) -> ParseResult<'_, u64> {
     let (input, name) = tuple((char('#'), digit1))
         .map(|(_sharp, name): (_, &str)| name.parse())
         .parse(input)?;
@@ -136,7 +136,7 @@ pub fn entity_instance_name(input: &str) -> ParseResult<u64> {
 /// -------
 /// - FIXME: If the input cannot be represented by `u64`, i.e. larger than [std::u64::MAX]
 ///
-pub fn value_instance_name(input: &str) -> ParseResult<u64> {
+pub fn value_instance_name(input: &str) -> ParseResult<'_, u64> {
     let (input, name) = tuple((char('@'), digit1))
         .map(|(_sharp, name): (_, &str)| name.parse())
         .parse(input)?;
@@ -148,21 +148,21 @@ pub fn value_instance_name(input: &str) -> ParseResult<u64> {
 }
 
 /// constant_entity_name = `#` ( [upper] ) { [upper] | [digit] } .
-pub fn constant_entity_name(input: &str) -> ParseResult<String> {
+pub fn constant_entity_name(input: &str) -> ParseResult<'_, String> {
     tuple((char('#'), standard_keyword))
         .map(|(_sharp, name)| name)
         .parse(input)
 }
 
 /// constant_value_name = `@` ( [upper] ) { [upper] | [digit] } .
-pub fn constant_value_name(input: &str) -> ParseResult<String> {
+pub fn constant_value_name(input: &str) -> ParseResult<'_, String> {
     tuple((char('@'), standard_keyword))
         .map(|(_sharp, name)| name)
         .parse(input)
 }
 
 /// lhs_occurrence_name = ( [entity_instance_name] | [value_instance_name] ) .
-pub fn lhs_occurrence_name(input: &str) -> ParseResult<Name> {
+pub fn lhs_occurrence_name(input: &str) -> ParseResult<'_, Name> {
     alt((
         entity_instance_name.map(Name::Entity),
         value_instance_name.map(Name::Value),
@@ -171,7 +171,7 @@ pub fn lhs_occurrence_name(input: &str) -> ParseResult<Name> {
 }
 
 /// rhs_occurrence_name = ( [entity_instance_name] | [value_instance_name] | [constant_entity_name] | [constant_value_name]) .
-pub fn rhs_occurrence_name(input: &str) -> ParseResult<Name> {
+pub fn rhs_occurrence_name(input: &str) -> ParseResult<'_, Name> {
     alt((
         entity_instance_name.map(Name::Entity),
         value_instance_name.map(Name::Value),
@@ -184,19 +184,19 @@ pub fn rhs_occurrence_name(input: &str) -> ParseResult<Name> {
 /// anchor_name = `<` URI_FRAGMENT_IDENTIFIER `>` .
 ///
 /// Parse as string, without validating as URI fragment identifier
-pub fn anchor_name(input: &str) -> ParseResult<String> {
+pub fn anchor_name(input: &str) -> ParseResult<'_, String> {
     tuple((char('<'), many0(none_of(">")), char('>')))
         .map(|(_start, s, _end)| s.iter().collect())
         .parse(input)
 }
 
 /// keyword = [user_defined_keyword] | [standard_keyword] .
-pub fn keyword(input: &str) -> ParseResult<String> {
+pub fn keyword(input: &str) -> ParseResult<'_, String> {
     alt((user_defined_keyword, standard_keyword)).parse(input)
 }
 
 /// standard_keyword = [upper] { [upper] | [digit] } .
-pub fn standard_keyword(input: &str) -> ParseResult<String> {
+pub fn standard_keyword(input: &str) -> ParseResult<'_, String> {
     tuple((upper, many0(alt((upper, digit)))))
         .map(|(first, tail)| {
             let head = &[first];
@@ -206,14 +206,14 @@ pub fn standard_keyword(input: &str) -> ParseResult<String> {
 }
 
 /// user_defined_keyword = `!` [upper] { [upper] | [digit] } .
-pub fn user_defined_keyword(input: &str) -> ParseResult<String> {
+pub fn user_defined_keyword(input: &str) -> ParseResult<'_, String> {
     tuple((char('!'), standard_keyword))
         .map(|(_e, name)| name)
         .parse(input)
 }
 
 /// tag_name = ( [upper] | [lower] ) { [upper] | [lower] | [digit] } .
-pub fn tag_name(input: &str) -> ParseResult<String> {
+pub fn tag_name(input: &str) -> ParseResult<'_, String> {
     tuple((alt((upper, lower)), many0(alt((upper, lower, digit)))))
         .map(|(first, tail)| {
             let head = &[first];
@@ -223,7 +223,7 @@ pub fn tag_name(input: &str) -> ParseResult<String> {
 }
 
 /// signature_content = BASE64 .
-pub fn signature_content(input: &str) -> ParseResult<String> {
+pub fn signature_content(input: &str) -> ParseResult<'_, String> {
     let base_char = satisfy(|c| matches!(c, '0'..='9' | 'a'..='z' | 'A'..='Z' | '+' | '/' | '='));
     many1(base_char)
         .map(|chars| chars.iter().collect())

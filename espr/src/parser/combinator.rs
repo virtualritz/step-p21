@@ -2,7 +2,7 @@
 
 use super::remark::*;
 use crate::ast::Remark;
-use nom::{error::VerboseError, sequence::pair, IResult};
+use nom::{IResult, error::VerboseError, sequence::pair};
 use std::marker::PhantomData;
 
 /// Parse result without remarks
@@ -66,7 +66,7 @@ impl<'a, Output, T> EsprParser<'a, Output> for T where
 {
 }
 
-pub fn eof(input: &str) -> ParseResult<&str> {
+pub fn eof(input: &str) -> ParseResult<'_, &str> {
     let (input, _) = nom::combinator::eof(input)?;
     Ok((input, ("", Vec::new())))
 }
@@ -143,7 +143,7 @@ pub fn char<'a>(c: char) -> impl EsprParser<'a, char> {
     }
 }
 
-pub fn spaces(input: &str) -> ParseResult<()> {
+pub fn spaces(input: &str) -> ParseResult<'_, ()> {
     let (input, remarks) = spaces_or_remarks(input)?;
     Ok((input, ((), remarks)))
 }

@@ -2,22 +2,22 @@ use crate::{
     ast::*,
     parser::{combinator::*, token::*},
 };
-use nom::{branch::alt, combinator::value, Parser};
+use nom::{Parser, branch::alt, combinator::value};
 
 /// list = `(` \[ [parameter] { `,` [parameter] } \] `)` .
-pub fn list(input: &str) -> ParseResult<Parameter> {
+pub fn list(input: &str) -> ParseResult<'_, Parameter> {
     tuple_((char_('('), opt_(comma_separated(parameter)), char_(')')))
         .map(|(_open, params, _close)| Parameter::List(params.unwrap_or_default()))
         .parse(input)
 }
 
 /// parameter = [typed_parameter] | [untyped_parameter] | [omitted_parameter] .
-pub fn parameter(input: &str) -> ParseResult<Parameter> {
+pub fn parameter(input: &str) -> ParseResult<'_, Parameter> {
     alt((typed_parameter, untyped_parameter, omitted_parameter)).parse(input)
 }
 
 /// typed_parameter = [keyword] `(` [parameter] `)` .
-pub fn typed_parameter(input: &str) -> ParseResult<Parameter> {
+pub fn typed_parameter(input: &str) -> ParseResult<'_, Parameter> {
     tuple_((keyword, char_('('), parameter, char_(')')))
         .map(|(name, _open, ty, _close)| Parameter::Typed {
             keyword: name,
@@ -27,7 +27,7 @@ pub fn typed_parameter(input: &str) -> ParseResult<Parameter> {
 }
 
 /// untyped_parameter = `$` | [integer] | [real] | [string] | [rhs_occurrence_name] | [enumeration] | binary | [list] .
-pub fn untyped_parameter(input: &str) -> ParseResult<Parameter> {
+pub fn untyped_parameter(input: &str) -> ParseResult<'_, Parameter> {
     alt((
         char_('$').map(|_| Parameter::NotProvided),
         real.map(Parameter::Real),
@@ -42,12 +42,12 @@ pub fn untyped_parameter(input: &str) -> ParseResult<Parameter> {
 }
 
 /// omitted_parameter = `*` .
-pub fn omitted_parameter(input: &str) -> ParseResult<Parameter> {
+pub fn omitted_parameter(input: &str) -> ParseResult<'_, Parameter> {
     value(Parameter::Omitted, char_('*')).parse(input)
 }
 
 /// parameter_list = [parameter] { `,` [parameter] } .
-pub fn parameter_list(input: &str) -> ParseResult<Vec<Parameter>> {
+pub fn parameter_list(input: &str) -> ParseResult<'_, Vec<Parameter>> {
     comma_separated(parameter).parse(input)
 }
 

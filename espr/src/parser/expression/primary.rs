@@ -6,7 +6,7 @@ use super::{
 use crate::ast::*;
 
 /// 269 primary = [literal] | ( [qualifiable_factor] { [qualifier] } ) .
-pub fn primary(input: &str) -> ParseResult<Expression> {
+pub fn primary(input: &str) -> ParseResult<'_, Expression> {
     alt((
         literal.map(Expression::Literal),
         tuple((qualifiable_factor, many0(qualifier)))
@@ -16,7 +16,7 @@ pub fn primary(input: &str) -> ParseResult<Expression> {
 }
 
 /// 274 qualifiable_factor = [attribute_ref] | [constant_factor] | [function_call] | [general_ref] | [population] .
-pub fn qualifiable_factor(input: &str) -> ParseResult<QualifiableFactor> {
+pub fn qualifiable_factor(input: &str) -> ParseResult<'_, QualifiableFactor> {
     alt((
         function_call,
         alt((attribute_ref, general_ref, population)).map(QualifiableFactor::Reference),
@@ -35,7 +35,7 @@ pub fn qualifiable_factor(input: &str) -> ParseResult<QualifiableFactor> {
 ///
 /// This function always requires `actual_parameter_list` in order to identify from
 /// other reference types.
-pub fn function_call(input: &str) -> ParseResult<QualifiableFactor> {
+pub fn function_call(input: &str) -> ParseResult<'_, QualifiableFactor> {
     let function_name = alt((
         built_in_function.map(FunctionCallName::BuiltInFunction),
         function_ref.map(FunctionCallName::Reference),
@@ -46,7 +46,7 @@ pub fn function_call(input: &str) -> ParseResult<QualifiableFactor> {
 }
 
 /// 167 actual_parameter_list = `(` [parameter] { `,` [parameter] } `)` .
-pub fn actual_parameter_list(input: &str) -> ParseResult<Vec<Expression>> {
+pub fn actual_parameter_list(input: &str) -> ParseResult<'_, Vec<Expression>> {
     tuple((
         char('('),
         opt(comma_separated(parameter)).map(|opt| opt.unwrap_or_default()),
@@ -57,7 +57,7 @@ pub fn actual_parameter_list(input: &str) -> ParseResult<Vec<Expression>> {
 }
 
 /// 264 parameter = [expression] .
-pub fn parameter(input: &str) -> ParseResult<Expression> {
+pub fn parameter(input: &str) -> ParseResult<'_, Expression> {
     expression(input)
 }
 
@@ -90,7 +90,7 @@ pub fn parameter(input: &str) -> ParseResult<Expression> {
 ///                       | VALUE
 ///                       | VALUE_IN
 ///                       | VALUE_UNIQUE .
-pub fn built_in_function(input: &str) -> ParseResult<BuiltInFunction> {
+pub fn built_in_function(input: &str) -> ParseResult<'_, BuiltInFunction> {
     // alt impl is up to 11-element tuple. In reverse order to match longer case first.
     alt((
         alt((
@@ -133,12 +133,12 @@ pub fn built_in_function(input: &str) -> ParseResult<BuiltInFunction> {
 }
 
 /// 267 population = entity_ref .
-pub fn population(input: &str) -> ParseResult<String> {
+pub fn population(input: &str) -> ParseResult<'_, String> {
     entity_ref(input)
 }
 
 /// 196 constant_factor = [built_in_constant] | [constant_ref] .
-pub fn constant_factor(input: &str) -> ParseResult<QualifiableFactor> {
+pub fn constant_factor(input: &str) -> ParseResult<'_, QualifiableFactor> {
     alt((
         built_in_constant.map(QualifiableFactor::BuiltInConstant),
         constant_ref.map(QualifiableFactor::Reference),
@@ -147,7 +147,7 @@ pub fn constant_factor(input: &str) -> ParseResult<QualifiableFactor> {
 }
 
 /// 276 qualifier = [attribute_qualifier] | [group_qualifier] | [index_qualifier] .
-pub fn qualifier(input: &str) -> ParseResult<Qualifier> {
+pub fn qualifier(input: &str) -> ParseResult<'_, Qualifier> {
     alt((
         attribute_qualifier.map(Qualifier::Attribute),
         group_qualifier.map(Qualifier::Group),
@@ -157,21 +157,21 @@ pub fn qualifier(input: &str) -> ParseResult<Qualifier> {
 }
 
 /// 179 attribute_qualifier = `.` [attribute_ref] .
-pub fn attribute_qualifier(input: &str) -> ParseResult<String> {
+pub fn attribute_qualifier(input: &str) -> ParseResult<'_, String> {
     tuple((char('.'), attribute_ref))
         .map(|(_dot, id)| id)
         .parse(input)
 }
 
 /// 232 group_qualifier = `\` [entity_ref] .
-pub fn group_qualifier(input: &str) -> ParseResult<String> {
+pub fn group_qualifier(input: &str) -> ParseResult<'_, String> {
     tuple((char('\\'), entity_ref))
         .map(|(_dot, id)| id)
         .parse(input)
 }
 
 /// 239 index_qualifier = `[` [index_1] [ `:` [index_2] ] `]` .
-pub fn index_qualifier(input: &str) -> ParseResult<Qualifier> {
+pub fn index_qualifier(input: &str) -> ParseResult<'_, Qualifier> {
     tuple((
         char('['),
         index_1,
@@ -189,22 +189,22 @@ pub fn index_qualifier(input: &str) -> ParseResult<Qualifier> {
 }
 
 /// 236 index = [numeric_expression] .
-pub fn index(input: &str) -> ParseResult<Expression> {
+pub fn index(input: &str) -> ParseResult<'_, Expression> {
     numeric_expression(input)
 }
 
 /// 237 index_1 = [index] .
-pub fn index_1(input: &str) -> ParseResult<Expression> {
+pub fn index_1(input: &str) -> ParseResult<'_, Expression> {
     index(input)
 }
 
 /// 238 index_2 = [index] .
-pub fn index_2(input: &str) -> ParseResult<Expression> {
+pub fn index_2(input: &str) -> ParseResult<'_, Expression> {
     index(input)
 }
 
 /// 186 built_in_constant = `CONST_E` | `PI` | `SELF` | `?` .
-pub fn built_in_constant(input: &str) -> ParseResult<BuiltInConstant> {
+pub fn built_in_constant(input: &str) -> ParseResult<'_, BuiltInConstant> {
     alt((
         value(BuiltInConstant::Napier, tag("CONST_E")),
         value(BuiltInConstant::Pi, tag("PI")),

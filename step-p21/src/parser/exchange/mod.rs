@@ -25,7 +25,7 @@ use nom::Parser;
 ///               { [data_section] }
 ///                 `END-ISO-10303-21;`
 ///               { signature_section } .
-pub fn exchange_file(input: &str) -> ParseResult<Exchange> {
+pub fn exchange_file(input: &str) -> ParseResult<'_, Exchange> {
     tuple_((
         tag_("ISO-10303-21;"),
         header_section,
@@ -48,7 +48,7 @@ pub fn exchange_file(input: &str) -> ParseResult<Exchange> {
 }
 
 /// signature_section  = `SIGNATURE` signature_content `ENDSEC;`.
-pub fn signature_section(input: &str) -> ParseResult<String> {
+pub fn signature_section(input: &str) -> ParseResult<'_, String> {
     tuple_((tag_("SIGNATURE"), signature_content, tag_("ENDSEC;")))
         .map(|(_start, sig, _end)| sig)
         .parse(input)

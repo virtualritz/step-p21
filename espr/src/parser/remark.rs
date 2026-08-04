@@ -2,15 +2,15 @@ use super::{basis::simple_id, combinator::RawParseResult};
 use crate::ast::Remark;
 use itertools::Itertools;
 use nom::{
-    branch::alt, bytes::complete::*, character::complete::*, combinator::opt, multi::*,
-    sequence::*, Parser,
+    Parser, branch::alt, bytes::complete::*, character::complete::*, combinator::opt, multi::*,
+    sequence::*,
 };
 
-fn begin(input: &str) -> RawParseResult<()> {
+fn begin(input: &str) -> RawParseResult<'_, ()> {
     tag("(*").map(|_| ()).parse(input)
 }
 
-fn end(input: &str) -> RawParseResult<String> {
+fn end(input: &str) -> RawParseResult<'_, String> {
     tuple((many1(char('*')), char(')')))
         .map(|(stars, lparen)| {
             format!("{}{}", stars.iter().collect::<String>(), lparen)
@@ -20,21 +20,21 @@ fn end(input: &str) -> RawParseResult<String> {
         .parse(input)
 }
 
-fn middle_star(input: &str) -> RawParseResult<String> {
+fn middle_star(input: &str) -> RawParseResult<'_, String> {
     tuple((many1(char('*')), none_of("*)")))
         .map(|(stars, c)| format!("{}{}", stars.iter().collect::<String>(), c))
         .parse(input)
 }
 
 /// Quoted string like `\`*)\``
-fn quoted(input: &str) -> RawParseResult<String> {
+fn quoted(input: &str) -> RawParseResult<'_, String> {
     tuple((char('`'), many0(none_of("`")), char('`')))
         .map(|(_quote_start, chars, _quote_end)| format!("`{}`", chars.iter().collect::<String>()))
         .parse(input)
 }
 
 /// String which does not include `*` and \`
-fn non_quoted(input: &str) -> RawParseResult<String> {
+fn non_quoted(input: &str) -> RawParseResult<'_, String> {
     many1(none_of("`*"))
         .map(|chars| chars.iter().collect::<String>())
         .parse(input)
@@ -59,7 +59,7 @@ fn non_quoted(input: &str) -> RawParseResult<String> {
 /// (* The `(*` symbol starts a remark, and the `*)` symbol ends it *)
 /// ```
 ///
-pub fn embedded_remark(input: &str) -> RawParseResult<Remark> {
+pub fn embedded_remark(input: &str) -> RawParseResult<'_, Remark> {
     tuple((
         begin,
         multispace0,
@@ -86,7 +86,7 @@ pub fn embedded_remark(input: &str) -> RawParseResult<Remark> {
 /// ```
 ///
 /// to support `\r\n` case and unicode string
-pub fn tail_remark(input: &str) -> RawParseResult<Remark> {
+pub fn tail_remark(input: &str) -> RawParseResult<'_, Remark> {
     tuple((
         tag("--"),
         space0,
@@ -107,12 +107,12 @@ pub fn tail_remark(input: &str) -> RawParseResult<Remark> {
 ///
 /// `remark_ref` is replaced by `simple_id` because it should be handled by following ir
 /// analysis phase.
-pub fn remark_tag(input: &str) -> RawParseResult<Vec<String>> {
+pub fn remark_tag(input: &str) -> RawParseResult<'_, Vec<String>> {
     delimited(char('"'), separated_list1(char('.'), simple_id), char('"')).parse(input)
 }
 
 /// Match to spaces or remarks
-pub fn spaces_or_remarks(input: &str) -> RawParseResult<Vec<Remark>> {
+pub fn spaces_or_remarks(input: &str) -> RawParseResult<'_, Vec<Remark>> {
     tuple((
         many0(tuple((multispace0, alt((embedded_remark, tail_remark))))),
         multispace0,

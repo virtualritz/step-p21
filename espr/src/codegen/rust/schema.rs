@@ -68,7 +68,7 @@ impl Schema {
 
         quote! {
             pub mod #name {
-                use #step_p21_path::{as_holder, Holder, TableInit, primitive::*, derive_more::*};
+                use #step_p21_path::{as_holder, Holder, TableInit, primitive::*, derive_more::{AsMut, AsRef, Deref, DerefMut, From, Into}};
                 use std::collections::HashMap;
 
                 #[derive(Debug, Clone, PartialEq, Default, TableInit)]

@@ -1,7 +1,7 @@
 use super::*;
 use inflector::Inflector;
+use proc_macro_error2::*;
 use proc_macro2::TokenStream as TokenStream2;
-use proc_macro_error::*;
 use quote::quote;
 
 struct Input {

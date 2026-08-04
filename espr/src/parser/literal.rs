@@ -5,7 +5,7 @@ use crate::ast::*;
 ///
 /// Integer value, e.g. `23`, will be recognized as a real number `23.0`.
 /// Use [integer_literal] if you wish to parse it as an integer.
-pub fn literal(input: &str) -> ParseResult<Literal> {
+pub fn literal(input: &str) -> ParseResult<'_, Literal> {
     // FIXME binary_literal,
     alt((
         logical_literal.map(Literal::Logial),
@@ -22,7 +22,7 @@ pub fn literal(input: &str) -> ParseResult<Literal> {
 /// `_POSITIVE`. An EXPRESS `simple_id` continues with a letter, a digit **or an
 /// underscore**, so all three have to be excluded -- guarding against letters
 /// alone left identifiers like `TRUE_NORTH`, `TRUE2` and `UNKNOWN_9` unparsable.
-pub fn logical_literal(input: &str) -> ParseResult<Logical> {
+pub fn logical_literal(input: &str) -> ParseResult<'_, Logical> {
     tuple((
         alt((
             value(Logical::True, tag("TRUE")),
@@ -49,19 +49,19 @@ fn identifier_continuation(
 ///
 /// Negative integer, e.g. `-23`,
 /// will be represented by the combination of `-` unary operator and integer literal `23`
-pub fn integer_literal(input: &str) -> ParseResult<u64> {
+pub fn integer_literal(input: &str) -> ParseResult<'_, u64> {
     remarked(nom::character::complete::digit1)
         .map(|d: &str| d.parse().unwrap())
         .parse(input)
 }
 
 /// 142 real_literal = integer_literal | ( digits `.` \[ digits \] \[ `e` \[ sign \] digits \] ) .
-pub fn real_literal(input: &str) -> ParseResult<f64> {
+pub fn real_literal(input: &str) -> ParseResult<'_, f64> {
     remarked(nom::number::complete::double).parse(input)
 }
 
 /// 310 string_literal = simple_string_literal | encoded_string_literal .
-pub fn string_literal(input: &str) -> ParseResult<String> {
+pub fn string_literal(input: &str) -> ParseResult<'_, String> {
     alt((
         remarked(simple_string_literal),
         remarked(encoded_string_literal),

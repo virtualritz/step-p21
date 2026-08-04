@@ -14,17 +14,17 @@ use super::{combinator::*, entity::*, identifier::*};
 use crate::ast::*;
 
 /// 198 constructed_types = [enumeration_type] | [select_type] .
-pub fn constructed_types(input: &str) -> ParseResult<Type> {
+pub fn constructed_types(input: &str) -> ParseResult<'_, Type> {
     alt((enumeration_type, select_type)).parse(input)
 }
 
 /// 332 underlying_type = [concrete_types] | [constructed_types] .
-pub fn underlying_type(input: &str) -> ParseResult<Type> {
+pub fn underlying_type(input: &str) -> ParseResult<'_, Type> {
     alt((concrete_types, constructed_types)).parse(input)
 }
 
 /// 327 type_decl = TYPE [type_id] `=` [underlying_type] `;` \[ [where_clause] \] END_TYPE `;` .
-pub fn type_decl(input: &str) -> ParseResult<TypeDecl> {
+pub fn type_decl(input: &str) -> ParseResult<'_, TypeDecl> {
     tuple((
         tag("TYPE"),
         type_id,

@@ -19,21 +19,21 @@ fn create_tree(mut head: Expression, tails: Vec<(BinaryOperator, Expression)>) -
 }
 
 /// 305 simple_expression = [term] { [add_like_op] [term] } .
-pub fn simple_expression(input: &str) -> ParseResult<Expression> {
+pub fn simple_expression(input: &str) -> ParseResult<'_, Expression> {
     tuple((term, many0(tuple((add_like_op, term)))))
         .map(|(head, tails)| create_tree(head, tails))
         .parse(input)
 }
 
 /// 325 term = [factor] { [multiplication_like_op] [factor] } .
-pub fn term(input: &str) -> ParseResult<Expression> {
+pub fn term(input: &str) -> ParseResult<'_, Expression> {
     tuple((factor, many0(tuple((multiplication_like_op, factor)))))
         .map(|(head, tails)| create_tree(head, tails))
         .parse(input)
 }
 
 /// 217 factor = [simple_factor] \[ `**` [simple_factor] \] .
-pub fn factor(input: &str) -> ParseResult<Expression> {
+pub fn factor(input: &str) -> ParseResult<'_, Expression> {
     tuple((simple_factor, opt(tuple((power_op, simple_factor)))))
         .map(|(arg1, opt)| {
             if let Some((op, arg2)) = opt {
@@ -55,7 +55,7 @@ pub fn factor(input: &str) -> ParseResult<Expression> {
 ///                   | [interval]
 ///                   | [query_expression]
 ///                   | ( \[ [unary_op] \] ( `(` [expression] `)` | [primary] ) ) .
-pub fn simple_factor(input: &str) -> ParseResult<Expression> {
+pub fn simple_factor(input: &str) -> ParseResult<'_, Expression> {
     let paren_expr = tuple((char('('), expression, char(')'))).map(|(_open, e, _close)| e);
     // ( \[ unary_op \] ( `(` expression `)` | primary ) )
     let unary = tuple((opt(unary_op), alt((paren_expr, primary)))).map(|(opt, expr)| {
@@ -80,7 +80,7 @@ pub fn simple_factor(input: &str) -> ParseResult<Expression> {
 }
 
 /// 216 expression = [simple_expression] \[ [rel_op_extended] [simple_expression] \] .
-pub fn expression(input: &str) -> ParseResult<Expression> {
+pub fn expression(input: &str) -> ParseResult<'_, Expression> {
     tuple((
         simple_expression,
         opt(tuple((rel_op_extended, simple_expression))),
@@ -100,7 +100,7 @@ pub fn expression(input: &str) -> ParseResult<Expression> {
 }
 
 /// 212 enumeration_reference = \[ [type_ref] `.` \] [enumeration_ref] .
-pub fn enumeration_reference(input: &str) -> ParseResult<Expression> {
+pub fn enumeration_reference(input: &str) -> ParseResult<'_, Expression> {
     tuple((opt(tuple((type_ref, char('.')))), enumeration_ref))
         .map(|(opt, enum_ref)| Expression::EnumerationReference {
             ty: opt.map(|(ty, _comma)| ty),
@@ -110,7 +110,7 @@ pub fn enumeration_reference(input: &str) -> ParseResult<Expression> {
 }
 
 /// 243 interval = `{` [interval_low] [interval_op] [interval_item] [interval_op] [interval_high] `}` .
-pub fn interval(input: &str) -> ParseResult<Expression> {
+pub fn interval(input: &str) -> ParseResult<'_, Expression> {
     tuple((
         char('{'),
         interval_low,
@@ -133,32 +133,32 @@ pub fn interval(input: &str) -> ParseResult<Expression> {
 }
 
 /// 244 interval_high = [simple_expression] .
-pub fn interval_high(input: &str) -> ParseResult<Expression> {
+pub fn interval_high(input: &str) -> ParseResult<'_, Expression> {
     simple_expression(input)
 }
 
 /// 245 interval_item = [simple_expression] .
-pub fn interval_item(input: &str) -> ParseResult<Expression> {
+pub fn interval_item(input: &str) -> ParseResult<'_, Expression> {
     simple_expression(input)
 }
 
 /// 246 interval_low = [simple_expression] .
-pub fn interval_low(input: &str) -> ParseResult<Expression> {
+pub fn interval_low(input: &str) -> ParseResult<'_, Expression> {
     simple_expression(input)
 }
 
 /// 170 aggregate_source = [simple_expression] .
-pub fn aggregate_source(input: &str) -> ParseResult<Expression> {
+pub fn aggregate_source(input: &str) -> ParseResult<'_, Expression> {
     simple_expression(input)
 }
 
 /// 254 logical_expression = [expression] .
-pub fn logical_expression(input: &str) -> ParseResult<Expression> {
+pub fn logical_expression(input: &str) -> ParseResult<'_, Expression> {
     expression(input)
 }
 
 /// 277 query_expression = QUERY `(` [variable_id] `<*` [aggregate_source] `|` [logical_expression] `)` .
-pub fn query_expression(input: &str) -> ParseResult<Expression> {
+pub fn query_expression(input: &str) -> ParseResult<'_, Expression> {
     tuple((
         tag("QUERY"),
         char('('),
@@ -180,7 +180,7 @@ pub fn query_expression(input: &str) -> ParseResult<Expression> {
 }
 
 /// 205 entity_constructor = entity_ref `(` [ [expression] { `,` [expression] } ] `)` .
-pub fn entity_constructor(input: &str) -> ParseResult<Expression> {
+pub fn entity_constructor(input: &str) -> ParseResult<'_, Expression> {
     tuple((
         entity_ref,
         char('('),

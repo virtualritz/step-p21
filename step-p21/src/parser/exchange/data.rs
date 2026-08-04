@@ -2,10 +2,10 @@ use crate::{
     ast::*,
     parser::{combinator::*, exchange::*, token::*},
 };
-use nom::{branch::alt, Parser};
+use nom::{Parser, branch::alt};
 
 /// data_section = `DATA` \[ `(` [parameter_list] `)` \] `;` [entity_instance_list] `ENDSEC;` .
-pub fn data_section(input: &str) -> ParseResult<DataSection> {
+pub fn data_section(input: &str) -> ParseResult<'_, DataSection> {
     tuple_((
         tag_("DATA"),
         opt_(tuple_((char_('('), parameter_list, char_(')')))),
@@ -23,24 +23,24 @@ pub fn data_section(input: &str) -> ParseResult<DataSection> {
 }
 
 /// entity_instance_list = { [entity_instance] } .
-pub fn entity_instance_list(input: &str) -> ParseResult<Vec<EntityInstance>> {
+pub fn entity_instance_list(input: &str) -> ParseResult<'_, Vec<EntityInstance>> {
     many0_(entity_instance).parse(input)
 }
 
 /// entity_instance = [simple_entity_instance] | [complex_entity_instance] .
-pub fn entity_instance(input: &str) -> ParseResult<EntityInstance> {
+pub fn entity_instance(input: &str) -> ParseResult<'_, EntityInstance> {
     alt((simple_entity_instance, complex_entity_instance)).parse(input)
 }
 
 /// simple_entity_instance = [entity_instance_name] `=` [simple_record] `;` .
-pub fn simple_entity_instance(input: &str) -> ParseResult<EntityInstance> {
+pub fn simple_entity_instance(input: &str) -> ParseResult<'_, EntityInstance> {
     tuple_((entity_instance_name, char_('='), simple_record, char_(';')))
         .map(|(id, _eq, record, _semicolon)| EntityInstance::Simple { id, record })
         .parse(input)
 }
 
 /// complex_entity_instance = [entity_instance_name] `=` [subsuper_record] `;` .
-pub fn complex_entity_instance(input: &str) -> ParseResult<EntityInstance> {
+pub fn complex_entity_instance(input: &str) -> ParseResult<'_, EntityInstance> {
     tuple_((
         entity_instance_name,
         char_('='),
@@ -52,7 +52,7 @@ pub fn complex_entity_instance(input: &str) -> ParseResult<EntityInstance> {
 }
 
 /// simple_record = [keyword] `(` \[ [parameter_list] \] `)` .
-pub fn simple_record(input: &str) -> ParseResult<Record> {
+pub fn simple_record(input: &str) -> ParseResult<'_, Record> {
     tuple_((keyword, char_('('), opt_(parameter_list), char_(')')))
         .map(|(name, _open, parameter, _close)| Record {
             name,
@@ -62,12 +62,12 @@ pub fn simple_record(input: &str) -> ParseResult<Record> {
 }
 
 /// simple_record_list = [simple_record] { [simple_record] } .
-pub fn simple_record_list(input: &str) -> ParseResult<Vec<Record>> {
+pub fn simple_record_list(input: &str) -> ParseResult<'_, Vec<Record>> {
     many0_(simple_record).parse(input)
 }
 
 /// subsuper_record = `(` [simple_record_list] `)` .
-pub fn subsuper_record(input: &str) -> ParseResult<SubSuperRecord> {
+pub fn subsuper_record(input: &str) -> ParseResult<'_, SubSuperRecord> {
     tuple_((char_('('), simple_record_list, char_(')')))
         .map(|(_open, records, _close)| SubSuperRecord(records))
         .parse(input)

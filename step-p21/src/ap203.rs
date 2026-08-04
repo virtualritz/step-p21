@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 pub mod config_control_design {
-    use crate::{as_holder, derive_more::*, primitive::*, Holder, TableInit};
+    use crate::{as_holder, derive_more::{AsMut, AsRef, Deref, DerefMut, From, Into}, primitive::*, Holder, TableInit};
     use std::collections::HashMap;
     #[derive(Debug, Clone, PartialEq, Default, TableInit)]
     pub struct Tables {

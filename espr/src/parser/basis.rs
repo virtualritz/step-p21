@@ -1,20 +1,20 @@
 #![allow(clippy::manual_is_ascii_check)]
 
 use super::{combinator::RawParseResult, reserved::is_reserved};
-use nom::{branch::*, character::complete::*, multi::*, sequence::*, Parser};
+use nom::{Parser, branch::*, character::complete::*, multi::*, sequence::*};
 
 /// 128 letter = `a` | `b` | `c` | `d` | `e` | `f` | `g` | `h` | `i` | `j` | `k` | `l` |`m` | `n` | `o` | `p` | `q` | `r` | `s` | `t` | `u` | `v` | `w` | `x` |`y` | `z` .
-pub fn letter(input: &str) -> RawParseResult<char> {
+pub fn letter(input: &str) -> RawParseResult<'_, char> {
     satisfy(|c| matches!(c, 'A'..='Z' | 'a'..='z')).parse(input)
 }
 
 /// 124 digit = `0` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9` .
-pub fn digit(input: &str) -> RawParseResult<char> {
+pub fn digit(input: &str) -> RawParseResult<'_, char> {
     satisfy(|c| matches!(c, '0'..='9')).parse(input)
 }
 
 /// 127 hex_digit = [digit] | `a` | `b` | `c` | `d` | `e` | `f` .
-pub fn hex_digit(input: &str) -> RawParseResult<u8> {
+pub fn hex_digit(input: &str) -> RawParseResult<'_, u8> {
     let hex_letter = satisfy(|c| matches!(c, 'A'..='Z' | 'a'..='f'));
     alt((digit, hex_letter))
         .map(|c| c.to_digit(16).unwrap() as u8)
@@ -22,7 +22,7 @@ pub fn hex_digit(input: &str) -> RawParseResult<u8> {
 }
 
 /// 136 octet = [hex_digit] [hex_digit] .
-pub fn octet(input: &str) -> RawParseResult<u8> {
+pub fn octet(input: &str) -> RawParseResult<'_, u8> {
     tuple((hex_digit, hex_digit))
         .map(|(u, l)| {
             assert!(u < 16);
@@ -33,14 +33,14 @@ pub fn octet(input: &str) -> RawParseResult<u8> {
 }
 
 /// 126 encoded_character = [octet] [octet] [octet] [octet] .
-pub fn encoded_character(input: &str) -> RawParseResult<[u8; 4]> {
+pub fn encoded_character(input: &str) -> RawParseResult<'_, [u8; 4]> {
     tuple((octet, octet, octet, octet))
         .map(|(a, b, c, d)| [a, b, c, d])
         .parse(input)
 }
 
 /// 140 encoded_string_literal = `"` [encoded_character] { [encoded_character] } `"` .
-pub fn encoded_string_literal(input: &str) -> RawParseResult<String> {
+pub fn encoded_string_literal(input: &str) -> RawParseResult<'_, String> {
     tuple((char('"'), many1(encoded_character), char('"')))
         .map(|(_openq, chars, _closeq)| {
             let raw_chars: Vec<u8> = chars.iter().flat_map(|c| c.iter()).cloned().collect();
@@ -50,7 +50,7 @@ pub fn encoded_string_literal(input: &str) -> RawParseResult<String> {
 }
 
 /// 144 simple_string_literal = \q { ( \q \q ) | not_quote | \s | \x9 | \xA | \xD } \q .
-pub fn simple_string_literal(input: &str) -> RawParseResult<String> {
+pub fn simple_string_literal(input: &str) -> RawParseResult<'_, String> {
     tuple((char('\''), many0(none_of("'")), char('\'')))
         .map(|(_open, chars, _close)| chars.into_iter().collect())
         .parse(input)
@@ -58,7 +58,7 @@ pub fn simple_string_literal(input: &str) -> RawParseResult<String> {
 
 /// 143 simple_id = [letter] { [letter] | [digit] | `_` } .
 /// According to the standard, identifiers cannot be reserved keywords.
-pub fn simple_id(input: &str) -> RawParseResult<String> {
+pub fn simple_id(input: &str) -> RawParseResult<'_, String> {
     if let Ok((input, id)) = tuple((letter, many0(alt((letter, digit, char('_'))))))
         .map(|(head, tail)| format!("{}{}", head, tail.into_iter().collect::<String>()))
         .parse(input)

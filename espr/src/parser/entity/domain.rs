@@ -2,7 +2,7 @@ use super::super::{combinator::*, expression::*, identifier::*};
 use crate::ast::*;
 
 /// 338 where_clause = WHERE [domain_rule] `;` { [domain_rule] `;` } .
-pub fn where_clause(input: &str) -> ParseResult<WhereClause> {
+pub fn where_clause(input: &str) -> ParseResult<'_, WhereClause> {
     tuple((tag("WHERE"), many0(tuple((domain_rule, char(';'))))))
         .map(|(_where, rules)| {
             let rules = rules.into_iter().map(|(rule, _semicolon)| rule).collect();
@@ -12,7 +12,7 @@ pub fn where_clause(input: &str) -> ParseResult<WhereClause> {
 }
 
 /// 202 domain_rule = \[ [rule_label_id] `:` \] [expression] .
-pub fn domain_rule(input: &str) -> ParseResult<DomainRule> {
+pub fn domain_rule(input: &str) -> ParseResult<'_, DomainRule> {
     tuple((opt(tuple((rule_label_id, char(':')))), expression))
         .map(|(opt, expr)| {
             let label = opt.map(|(label, _colon)| label);

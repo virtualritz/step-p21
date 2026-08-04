@@ -1,4 +1,4 @@
-use super::{scope::*, SemanticError};
+use super::{SemanticError, scope::*};
 use crate::ast::{self, SyntaxTree};
 
 use std::collections::HashMap;

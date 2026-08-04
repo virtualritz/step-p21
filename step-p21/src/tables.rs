@@ -103,8 +103,8 @@
 
 use crate::{ast::*, error::*};
 use serde::{
-    de::{self, IntoDeserializer, VariantAccess},
     Deserialize,
+    de::{self, IntoDeserializer, VariantAccess},
 };
 use std::{collections::HashMap, fmt, marker::PhantomData};
 

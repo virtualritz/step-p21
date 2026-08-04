@@ -11,6 +11,7 @@
 //! and combinators in this submodule responsible for handling them.
 
 use nom::{
+    IResult, Parser,
     branch::alt,
     bytes::complete::tag,
     character::complete::{char, multispace0, multispace1, none_of},
@@ -18,7 +19,6 @@ use nom::{
     error::VerboseError,
     multi::{many0, many1},
     sequence::tuple,
-    IResult, Parser,
 };
 
 /// Parse result
@@ -61,7 +61,7 @@ pub fn opt_<'a, O>(f: impl ExchangeParser<'a, O>) -> impl ExchangeParser<'a, Opt
 ///
 /// These comments are dropped while parsing. Do not passed to following convert step.
 ///
-pub fn comment(input: &str) -> ParseResult<String> {
+pub fn comment(input: &str) -> ParseResult<'_, String> {
     let internal = alt((
         none_of("*"),
         tuple((char('*'), peek(not(char('/'))))).map(|(star, _not_slash)| star),
@@ -80,7 +80,7 @@ pub fn comment(input: &str) -> ParseResult<String> {
 /// ------
 /// - support explicit print control directives
 ///
-pub fn separator(input: &str) -> ParseResult<()> {
+pub fn separator(input: &str) -> ParseResult<'_, ()> {
     let comment = many1(tuple((multispace0, comment, multispace0))).map(|_| ());
     alt((comment, value((), multispace1))).parse(input)
 }
@@ -110,7 +110,7 @@ pub fn many1_<'a, O>(f: impl ExchangeParser<'a, O>) -> impl ExchangeParser<'a, V
     }
 }
 
-pub fn ignorable(input: &str) -> ParseResult<()> {
+pub fn ignorable(input: &str) -> ParseResult<'_, ()> {
     let comment = many1(tuple((multispace0, comment, multispace0))).map(|_| ());
     alt((comment, value((), multispace0))).parse(input)
 }
@@ -265,7 +265,7 @@ mod tests {
         assert!(super::separator("").finish().is_err());
     }
 
-    fn tuple_digit(input: &str) -> ParseResult<(char, char)> {
+    fn tuple_digit(input: &str) -> ParseResult<'_, (char, char)> {
         tuple_((digit, digit)).parse(input)
     }
 
@@ -292,7 +292,7 @@ mod tests {
         assert!(tuple_digit(" 1 /* comment */ 2").finish().is_err());
     }
 
-    fn many0_digit(input: &str) -> ParseResult<Vec<char>> {
+    fn many0_digit(input: &str) -> ParseResult<'_, Vec<char>> {
         many0_(digit).parse(input)
     }
 
@@ -322,7 +322,7 @@ mod tests {
         assert!(digits.is_empty());
     }
 
-    fn many1_digit(input: &str) -> ParseResult<Vec<char>> {
+    fn many1_digit(input: &str) -> ParseResult<'_, Vec<char>> {
         many1_(digit).parse(input)
     }
 
@@ -369,7 +369,7 @@ mod tests {
         assert_eq!(res, "");
     }
 
-    fn comma_digit(input: &str) -> ParseResult<Vec<char>> {
+    fn comma_digit(input: &str) -> ParseResult<'_, Vec<char>> {
         comma_separated(digit).parse(input)
     }
 

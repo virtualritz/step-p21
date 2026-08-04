@@ -1,8 +1,56 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 members = [
   "espr",
   "espr-derive",
   "step-p21",
   "step-p21-derive",
 ]
+
+# Shared metadata, so the four crates cannot drift apart.
+[workspace.package]
+version = "0.5.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+repository = "https://github.com/virtualritz/step-p21"
+authors = [
+  "Moritz Moeller <virtualritz@protonmail.com>",
+  "Toshiki Teramura <teramura@ricos.co.jp>",
+  "Yoshinori Tanimura <tanimura@ricos.co.jp>",
+]
+
+# Requirements are stated as loosely as the code allows -- a major for 1.0+
+# crates, `0.minor` below that -- so a consumer is free to unify on a newer
+# patch or minor without a lockstep bump here.
+[workspace.dependencies]
+anyhow = "1"
+check_keyword = "0.4"
+clap = { version = "4", features = ["derive"] }
+derive-new = "0.7"
+derive_more = { version = "2", features = ["full"] }
+# NOT heck: `heck` and `Inflector` disagree on digit boundaries, and this
+# conversion is WIRE-VISIBLE -- the derive turns a Rust type name back into an
+# EXPRESS keyword. Inflector round-trips `SUB_1` -> `Sub1` -> `SUB_1`; heck
+# yields `SUB1` and the entity stops matching. Measured, not assumed: swapping
+# it fails 9 tests with `invalid value: SUB_1, expected SUB1`. Unmaintained
+# since 2019, so replacing it means owning the conversion, not just the name.
+Inflector = "0.11"
+insta = "1"
+itertools = "0.15"
+katexit = "0.1"
+maplit = "1"
+nom = "7"
+proc-macro-crate = "3"
+proc-macro-error2 = "2"
+proc-macro2 = "1"
+quote = "1"
+serde = { version = "1", features = ["derive"] }
+syn = { version = "2", features = ["full", "extra-traits"] }
+thiserror = "2"
+trybuild = "1"
+
+espr = { version = "0.5.0", path = "espr" }
+espr-derive = { version = "0.5.0", path = "espr-derive" }
+step-p21 = { version = "0.5.0", path = "step-p21" }
+step-p21-derive = { version = "0.5.0", path = "step-p21-derive" }

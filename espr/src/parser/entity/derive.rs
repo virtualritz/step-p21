@@ -5,14 +5,14 @@ use crate::{
 };
 
 /// 201 derive_clause = DERIVE [derived_attr] { [derived_attr] } .
-pub fn derive_clause(input: &str) -> ParseResult<DeriveClause> {
+pub fn derive_clause(input: &str) -> ParseResult<'_, DeriveClause> {
     tuple((tag("DERIVE"), many1(derived_attr)))
         .map(|(_derive, attributes)| DeriveClause { attributes })
         .parse(input)
 }
 
 /// 200 derived_attr = [attribute_decl] `:` [parameter_type] `:=` [expression] `;` .
-pub fn derived_attr(input: &str) -> ParseResult<DerivedAttribute> {
+pub fn derived_attr(input: &str) -> ParseResult<'_, DerivedAttribute> {
     tuple((
         attribute_decl,
         char(':'),

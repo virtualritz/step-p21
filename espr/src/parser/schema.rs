@@ -4,7 +4,7 @@ use super::{
 use crate::ast::*;
 
 /// 296 schema_decl = SCHEMA [schema_id] \[ schema_version_id \] `;` [schema_body] END_SCHEMA `;` .
-pub fn schema_decl(input: &str) -> ParseResult<Schema> {
+pub fn schema_decl(input: &str) -> ParseResult<'_, Schema> {
     // FIXME schema_version_id
     let schema_head =
         tuple((tag("SCHEMA "), schema_id, char(';'))).map(|(_start, id, _semicolon)| id);
@@ -46,7 +46,7 @@ pub fn schema_decl(input: &str) -> ParseResult<Schema> {
 /// 295 schema_body = { [interface_specification] } \[ [constant_decl] \] { [declaration] | [rule_decl] } .
 pub fn schema_body(
     input: &str,
-) -> ParseResult<(Vec<InterfaceSpec>, Vec<Constant>, Vec<Declaration>)> {
+) -> ParseResult<'_, (Vec<InterfaceSpec>, Vec<Constant>, Vec<Declaration>)> {
     tuple((
         many0(interface_specification),
         opt(constant_decl).map(|opt| opt.unwrap_or_default()),
@@ -56,7 +56,7 @@ pub fn schema_body(
 }
 
 /// 199 declaration = [entity_decl] | [function_decl] | [procedure_decl] | [subtype_constraint_decl] | [type_decl] .
-pub fn declaration(input: &str) -> ParseResult<Declaration> {
+pub fn declaration(input: &str) -> ParseResult<'_, Declaration> {
     alt((
         entity_decl.map(Declaration::Entity),
         type_decl.map(Declaration::Type),
@@ -68,7 +68,7 @@ pub fn declaration(input: &str) -> ParseResult<Declaration> {
 }
 
 /// 271 procedure_decl = [procedure_head] [algorithm_head] { [stmt] } END_PROCEDURE `;` .
-pub fn procedure_decl(input: &str) -> ParseResult<Procedure> {
+pub fn procedure_decl(input: &str) -> ParseResult<'_, Procedure> {
     tuple((
         procedure_head,
         algorithm_head,
@@ -101,7 +101,7 @@ pub fn procedure_decl(input: &str) -> ParseResult<Procedure> {
 ///                      \[ VAR \] [formal_parameter]
 ///                    }
 ///                    `)` \] `;` .
-pub fn procedure_head(input: &str) -> ParseResult<(String, Vec<FormalParameter>)> {
+pub fn procedure_head(input: &str) -> ParseResult<'_, (String, Vec<FormalParameter>)> {
     let param = tuple((opt(tag("VAR")), formal_parameter)).map(|(var, mut params)| {
         for param in &mut params {
             param.is_variable = var.is_some();
@@ -126,7 +126,7 @@ pub fn procedure_head(input: &str) -> ParseResult<(String, Vec<FormalParameter>)
 }
 
 /// 220 function_decl = [function_head] [algorithm_head] [stmt] { [stmt] } END_FUNCTION `;` .
-pub fn function_decl(input: &str) -> ParseResult<Function> {
+pub fn function_decl(input: &str) -> ParseResult<'_, Function> {
     tuple((
         function_head,
         algorithm_head,
@@ -157,7 +157,7 @@ pub fn function_decl(input: &str) -> ParseResult<Function> {
 /// 221 function_head = FUNCTION [function_id]
 ///                   \[ `(` [formal_parameter] { `;` [formal_parameter] } `)` \]
 ///                   `:` [parameter_type] `;` .
-pub fn function_head(input: &str) -> ParseResult<(String, Vec<FormalParameter>, Type)> {
+pub fn function_head(input: &str) -> ParseResult<'_, (String, Vec<FormalParameter>, Type)> {
     tuple((
         tag("FUNCTION"),
         function_id,
@@ -178,7 +178,7 @@ pub fn function_head(input: &str) -> ParseResult<(String, Vec<FormalParameter>, 
 }
 
 /// 218 formal_parameter = [parameter_id] { `,` [parameter_id] } `:` [parameter_type] .
-pub fn formal_parameter(input: &str) -> ParseResult<Vec<FormalParameter>> {
+pub fn formal_parameter(input: &str) -> ParseResult<'_, Vec<FormalParameter>> {
     tuple((comma_separated(parameter_id), char(':'), parameter_type))
         .map(|(names, _comma, ty)| {
             names
@@ -194,7 +194,7 @@ pub fn formal_parameter(input: &str) -> ParseResult<Vec<FormalParameter>> {
 }
 
 /// 195 constant_decl = CONSTANT [constant_body] { [constant_body] } END_CONSTANT `;` .
-pub fn constant_decl(input: &str) -> ParseResult<Vec<Constant>> {
+pub fn constant_decl(input: &str) -> ParseResult<'_, Vec<Constant>> {
     tuple((
         tag("CONSTANT"),
         many1(constant_body),
@@ -206,7 +206,7 @@ pub fn constant_decl(input: &str) -> ParseResult<Vec<Constant>> {
 }
 
 /// 194 constant_body = [constant_id] `:` [instantiable_type] `:=` [expression] `;` .
-pub fn constant_body(input: &str) -> ParseResult<Constant> {
+pub fn constant_body(input: &str) -> ParseResult<'_, Constant> {
     tuple((
         constant_id,
         char(':'),
@@ -220,7 +220,7 @@ pub fn constant_body(input: &str) -> ParseResult<Constant> {
 }
 
 /// 291 rule_decl = [rule_head] [algorithm_head] { [stmt] } [where_clause] END_RULE `;` .
-pub fn rule_decl(input: &str) -> ParseResult<Rule> {
+pub fn rule_decl(input: &str) -> ParseResult<'_, Rule> {
     tuple((
         rule_head,
         algorithm_head,
@@ -251,7 +251,7 @@ pub fn rule_decl(input: &str) -> ParseResult<Rule> {
 }
 
 /// 292 rule_head = RULE [rule_id] FOR `(` [entity_ref] { `,` [entity_ref] } `)` `;` .
-pub fn rule_head(input: &str) -> ParseResult<(String, Vec<String>)> {
+pub fn rule_head(input: &str) -> ParseResult<'_, (String, Vec<String>)> {
     tuple((
         tag("RULE"),
         rule_id,
@@ -268,7 +268,7 @@ pub fn rule_head(input: &str) -> ParseResult<(String, Vec<String>)> {
 /// 173 algorithm_head = { [declaration] } \[ [constant_decl] \] \[ [local_decl] \] .
 pub fn algorithm_head(
     input: &str,
-) -> ParseResult<(Vec<Declaration>, Vec<Constant>, Vec<LocalVariable>)> {
+) -> ParseResult<'_, (Vec<Declaration>, Vec<Constant>, Vec<LocalVariable>)> {
     tuple((
         many0(declaration),
         opt(constant_decl).map(|opt| opt.unwrap_or_default()),
@@ -278,7 +278,7 @@ pub fn algorithm_head(
 }
 
 /// 252 local_decl = LOCAL [local_variable] { [local_variable] } END_LOCAL `;` .
-pub fn local_decl(input: &str) -> ParseResult<Vec<LocalVariable>> {
+pub fn local_decl(input: &str) -> ParseResult<'_, Vec<LocalVariable>> {
     tuple((
         tag("LOCAL"),
         many1(local_variable),
@@ -292,7 +292,7 @@ pub fn local_decl(input: &str) -> ParseResult<Vec<LocalVariable>> {
 }
 
 /// 253 local_variable = [variable_id] { `,` [variable_id] } `:` [parameter_type] \[ `:=` [expression] \] `;` .
-pub fn local_variable(input: &str) -> ParseResult<Vec<LocalVariable>> {
+pub fn local_variable(input: &str) -> ParseResult<'_, Vec<LocalVariable>> {
     tuple((
         comma_separated(variable_id),
         char(':'),
@@ -314,12 +314,12 @@ pub fn local_variable(input: &str) -> ParseResult<Vec<LocalVariable>> {
 }
 
 /// 242 interface_specification = [reference_clause] | [use_clause] .
-pub fn interface_specification(input: &str) -> ParseResult<InterfaceSpec> {
+pub fn interface_specification(input: &str) -> ParseResult<'_, InterfaceSpec> {
     alt((reference_clause, use_clause)).parse(input)
 }
 
 /// 281 reference_clause = REFERENCE FROM [schema_ref] \[ `(` [resource_or_rename] { `,` [resource_or_rename] } `)` \] `;` .
-pub fn reference_clause(input: &str) -> ParseResult<InterfaceSpec> {
+pub fn reference_clause(input: &str) -> ParseResult<'_, InterfaceSpec> {
     tuple((
         tag("REFERENCE"),
         tag("FROM"),
@@ -336,7 +336,7 @@ pub fn reference_clause(input: &str) -> ParseResult<InterfaceSpec> {
 }
 
 /// 288 resource_or_rename = [resource_ref] \[ AS [rename_id] \] .
-pub fn resource_or_rename(input: &str) -> ParseResult<(String, Option<String>)> {
+pub fn resource_or_rename(input: &str) -> ParseResult<'_, (String, Option<String>)> {
     tuple((
         resource_ref,
         opt(tuple((tag("AS"), rename_id)).map(|(_as, rename)| rename)),
@@ -347,7 +347,7 @@ pub fn resource_or_rename(input: &str) -> ParseResult<(String, Option<String>)> 
 /// 336 use_clause = USE FROM [schema_ref]
 ///                \[ `(` [named_type_or_rename] { `,` [named_type_or_rename] } `)`
 ///                \] `;` .
-pub fn use_clause(input: &str) -> ParseResult<InterfaceSpec> {
+pub fn use_clause(input: &str) -> ParseResult<'_, InterfaceSpec> {
     tuple((
         tag("USE"),
         tag("FROM"),
@@ -364,7 +364,7 @@ pub fn use_clause(input: &str) -> ParseResult<InterfaceSpec> {
 }
 
 /// 259 named_type_or_rename = [named_types] \[ AS ( [entity_id] | [type_id] ) \] .
-pub fn named_type_or_rename(input: &str) -> ParseResult<(String, Option<String>)> {
+pub fn named_type_or_rename(input: &str) -> ParseResult<'_, (String, Option<String>)> {
     tuple((
         named_types,
         opt(tuple((tag("AS"), alt((entity_id, type_id)))).map(|(_as, id)| id)),
@@ -410,7 +410,7 @@ mod tests {
             .finish()
             .unwrap()
             .1
-             .0
+            .0
         );
         assert_eq!(
             schema.entities[1],
@@ -425,7 +425,7 @@ mod tests {
             .finish()
             .unwrap()
             .1
-             .0
+            .0
         );
         assert_eq!(residual, "");
     }

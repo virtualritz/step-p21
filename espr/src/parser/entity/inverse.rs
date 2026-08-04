@@ -5,7 +5,7 @@ use crate::{
 };
 
 /// 249 inverse_clause = INVERSE [inverse_attr] { [inverse_attr] } .
-pub fn inverse_clause(input: &str) -> ParseResult<InverseClause> {
+pub fn inverse_clause(input: &str) -> ParseResult<'_, InverseClause> {
     tuple((tag("INVERSE"), many1(inverse_attr)))
         .map(|(_inverse, attributes)| InverseClause { attributes })
         .parse(input)
@@ -16,7 +16,7 @@ pub fn inverse_clause(input: &str) -> ParseResult<InverseClause> {
 ///                  [entity_ref] FOR
 ///                  \[ [entity_ref] `.` \]
 ///                  [attribute_ref] `;` .
-pub fn inverse_attr(input: &str) -> ParseResult<InverseAttribute> {
+pub fn inverse_attr(input: &str) -> ParseResult<'_, InverseAttribute> {
     let aggregation_option = opt(tuple((
         alt((tag("SET"), tag("BAG"))),
         opt(bound_spec),

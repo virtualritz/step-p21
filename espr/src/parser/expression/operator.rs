@@ -2,7 +2,7 @@ use super::super::combinator::*;
 use crate::ast::*;
 
 /// 282 rel_op = `<` | `>` | `<=` | `>=` | `<>` | `=` | `:<>:` | `:=:` .
-pub fn rel_op(input: &str) -> ParseResult<RelationOperator> {
+pub fn rel_op(input: &str) -> ParseResult<'_, RelationOperator> {
     alt((
         value(RelationOperator::InstanceEqual, tag(":=:")),
         value(RelationOperator::InstanceNotEqual, tag(":<>:")),
@@ -17,7 +17,7 @@ pub fn rel_op(input: &str) -> ParseResult<RelationOperator> {
 }
 
 /// 283 rel_op_extended = [rel_op] | `IN` | `LIKE` .
-pub fn rel_op_extended(input: &str) -> ParseResult<RelationOperator> {
+pub fn rel_op_extended(input: &str) -> ParseResult<'_, RelationOperator> {
     alt((
         rel_op,
         alt((
@@ -29,7 +29,7 @@ pub fn rel_op_extended(input: &str) -> ParseResult<RelationOperator> {
 }
 
 /// 331 unary_op = `+` | `-` | `NOT` .
-pub fn unary_op(input: &str) -> ParseResult<UnaryOperator> {
+pub fn unary_op(input: &str) -> ParseResult<'_, UnaryOperator> {
     alt((
         value(UnaryOperator::Plus, tag("+")),
         value(UnaryOperator::Minus, tag("-")),
@@ -39,7 +39,7 @@ pub fn unary_op(input: &str) -> ParseResult<UnaryOperator> {
 }
 
 /// 168 add_like_op = `+` | `-` | `OR` | `XOR` .
-pub fn add_like_op(input: &str) -> ParseResult<BinaryOperator> {
+pub fn add_like_op(input: &str) -> ParseResult<'_, BinaryOperator> {
     use BinaryOperator::*;
     alt((
         value(Add, tag("+")),
@@ -51,7 +51,7 @@ pub fn add_like_op(input: &str) -> ParseResult<BinaryOperator> {
 }
 
 /// 257 multiplication_like_op = `*` | `/` | `DIV` | `MOD` | `AND` | `||` .
-pub fn multiplication_like_op(input: &str) -> ParseResult<BinaryOperator> {
+pub fn multiplication_like_op(input: &str) -> ParseResult<'_, BinaryOperator> {
     alt((
         value(BinaryOperator::Mul, tag("*")),
         value(BinaryOperator::RealDiv, tag("/")),
@@ -66,12 +66,12 @@ pub fn multiplication_like_op(input: &str) -> ParseResult<BinaryOperator> {
 /// 999 power_op = `**`
 ///
 /// Additional trivial rule for managing operators uniformly
-pub fn power_op(input: &str) -> ParseResult<BinaryOperator> {
+pub fn power_op(input: &str) -> ParseResult<'_, BinaryOperator> {
     value(BinaryOperator::Power, tag("**")).parse(input)
 }
 
 /// 247 interval_op = `<` | `<=` .
-pub fn interval_op(input: &str) -> ParseResult<IntervalOperator> {
+pub fn interval_op(input: &str) -> ParseResult<'_, IntervalOperator> {
     alt((
         value(IntervalOperator::LessThanEqual, tag("<=")),
         value(IntervalOperator::LessThan, tag("<")),

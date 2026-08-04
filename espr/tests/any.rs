@@ -27,7 +27,12 @@ fn any() {
     insta::assert_snapshot!(tt, @r###"
     pub mod test_schema {
         use std::collections::HashMap;
-        use step_p21::{as_holder, derive_more::*, primitive::*, Holder, TableInit};
+        use step_p21::{
+            as_holder,
+            derive_more::{AsMut, AsRef, Deref, DerefMut, From, Into},
+            primitive::*,
+            Holder, TableInit,
+        };
         #[derive(Debug, Clone, PartialEq, Default, TableInit)]
         pub struct Tables {
             base: HashMap<u64, as_holder!(Base)>,
