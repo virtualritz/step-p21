@@ -51,7 +51,7 @@ cargo fmt --all
 cargo clippy --workspace --all-targets
 ```
 
-`step-p11/tests/*.rs` use **inline** `insta` snapshots, which live in the test source
+`crates/step-p11/tests/*.rs` use **inline** `insta` snapshots, which live in the test source
 rather than in `.snap` files. `INSTA_UPDATE` will not rewrite them; use
 `cargo insta` or edit the literal. A rename that changes how `rustfmt` sorts the
 generated `use` lines will move those snapshots -- that is expected, but read the
@@ -81,7 +81,7 @@ input matters.
 
 Two behaviors are load-bearing for downstream users and must never regress:
 `''` as an escaped apostrophe, and `()` as an empty aggregate. See
-`step-p21/tests/unreleased_syntax_fixes.rs`.
+`crates/step-p21/tests/unreleased_syntax_fixes.rs`.
 
 ## Upstream
 

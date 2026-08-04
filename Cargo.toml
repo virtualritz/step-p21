@@ -1,10 +1,10 @@
 [workspace]
 resolver = "3"
 members = [
-  "step-p11",
-  "step-p11-derive",
-  "step-p21",
-  "step-p21-derive",
+  "crates/step-p11",
+  "crates/step-p11-derive",
+  "crates/step-p21",
+  "crates/step-p21-derive",
 ]
 
 # Shared metadata, so the four crates cannot drift apart.
@@ -61,7 +61,7 @@ trybuild = "1"
 # Path-only, NO version key. These two are never published, and a dev-dependency
 # that carries a version is resolved from crates.io at publish time -- which would
 # make `step-p21` unpublishable. Cargo strips path-only dev-dependencies instead.
-step-p11 = { path = "step-p11" }
-step-p11-derive = { path = "step-p11-derive" }
-step-p21 = { version = "0.5.0", path = "step-p21" }
-step-p21-derive = { version = "0.5.0", path = "step-p21-derive" }
+step-p11 = { path = "crates/step-p11" }
+step-p11-derive = { path = "crates/step-p11-derive" }
+step-p21 = { version = "0.5.0", path = "crates/step-p21" }
+step-p21-derive = { version = "0.5.0", path = "crates/step-p21-derive" }
