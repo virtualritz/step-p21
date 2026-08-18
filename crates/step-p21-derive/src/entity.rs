@@ -144,7 +144,19 @@ pub fn impl_holder(
     let step_p21 = step_p21_crate();
 
     quote! {
+        // `#into_owned` expands to the field's own identifier whenever the field
+        // needs no conversion, so this emits `field: field` and trips
+        // `clippy::redundant_field_names` in the CONSUMER. `#[automatically_derived]`
+        // does not help -- it marks the impl for rustdoc and a few rustc
+        // diagnostics, and suppresses no clippy lint.
+        //
+        // Generated code must not lint in the crate that invoked the derive. Before
+        // this, one consumer collected 152 errors whose spans all pointed at its
+        // field DECLARATIONS, because that is where the macro expands -- so the only
+        // remedies available to it were editing 152 sites it did not write, or a
+        // blanket allow that would also hide its own redundancy.
         #[automatically_derived]
+        #[allow(clippy::redundant_field_names)]
         impl #step_p21::tables::IntoOwned for #holder_ident {
             type Table = #table;
             type Owned = #ident;

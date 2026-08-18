@@ -1,3 +1,22 @@
+# 0.1.1 (2026-08-18)
+
+- `step-p21-derive`: the generated `IntoOwned` impl carries
+  `#[allow(clippy::redundant_field_names)]`.
+
+  `#into_owned` expands to the field's own identifier whenever a field needs no
+  conversion, so the derive emitted `field: field` and the lint fired in the
+  CONSUMER. `#[automatically_derived]` was already present and does not help: it
+  marks an impl for rustdoc and a handful of rustc diagnostics, and suppresses no
+  clippy lint.
+
+  Measured on one consumer with its own scoped allow removed: **153 errors before,
+  0 after.** Every span pointed at that crate's field DECLARATIONS, because that is
+  where the macro expands -- so the only remedies available to it were editing 153
+  sites it did not write, or a blanket allow that would also have hidden its own
+  redundancy.
+
+  Generated code must not lint in the crate that invoked the derive.
+
 # Fork: step-p21 0.5.0 (2026-08-04)
 
 Forked from [`ricosjp/ruststep`](https://github.com/ricosjp/ruststep) at
